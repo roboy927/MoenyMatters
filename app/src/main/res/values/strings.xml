@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Money Matters</string>
+    <string name="title_activity_add_account">AddAccountActivity</string>
+
+    <string name="select_date_content_description">Select Date</string>
+    <string name="title_activity_accounting">Accounting</string>
+
+
+    <string name="rupee_symbol">\u20B9</string>
+</resources>
