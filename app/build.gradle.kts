@@ -50,6 +50,13 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    sourceSets {
+        getByName("main") {
+            assets {
+                srcDirs("src\\main\\assets", "src\\main\\assets\\database.db")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -62,6 +69,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
+
+    implementation("androidx.compose.foundation:foundation-android:1.6.7")
 
 
     implementation("com.google.android.material:material:1.11.0")
