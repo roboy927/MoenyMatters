@@ -137,7 +137,7 @@ fun BottomSheetContent(
             modifier
                 .fillMaxHeight(0.3f)
                 .fillMaxWidth()
-                .background(if (enabledButton) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.outline.copy(0.6f))
+                .background(if (enabledButton) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.outline.copy(0.4f))
                 .clickable(enabled = enabledButton) {
                     onApplyFilter()
                 },

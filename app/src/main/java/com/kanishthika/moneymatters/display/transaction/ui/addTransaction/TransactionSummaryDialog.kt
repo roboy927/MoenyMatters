@@ -27,9 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
-import com.kanishthika.moneymatters.display.accounting.data.AccountingType
 import com.kanishthika.moneymatters.display.accounting.data.getName
-import com.kanishthika.moneymatters.display.transaction.data.TransactionType
 
 @Composable
 fun TransactionSummaryDialog(
@@ -38,6 +36,7 @@ fun TransactionSummaryDialog(
     navController: NavController
 ) {
     val transactionUiState by addTransactionModel.transactionUiState.collectAsState()
+    val list by addTransactionModel.transactionBodyUiState.collectAsState()
 
     Dialog(onDismissRequest = {  }) {
         Surface(
@@ -49,7 +48,7 @@ fun TransactionSummaryDialog(
             Column {
                 TransactionSummaryHeader(modifier)
                 Spacer(modifier.height(4.dp))
-                TransactionDetails(modifier, transactionUiState)
+                TransactionDetails(modifier, transactionUiState, list)
                 Spacer(modifier.height(4.dp))
                 ActionButtons(modifier, addTransactionModel, navController)
                 Spacer(modifier.height(4.dp))
@@ -76,54 +75,57 @@ fun TransactionSummaryHeader(modifier: Modifier) {
 }
 
 @Composable
-fun TransactionDetails(modifier: Modifier, transactionUiState: TransactionUiState) {
-    Column(modifier = modifier.padding(6.dp)) {
-        DetailRow(
-            modifier,
-            "",
-            transactionUiState.date,
-            MaterialTheme.typography.titleSmall,
-            MaterialTheme.colorScheme.onPrimary.copy(0.6f)
-        )
-        DetailRow(
-            modifier,
-            "${capitalizeWords(transactionUiState.transactionType.name)}ed from ${
-                capitalizeWords(
-                    transactionUiState.account.name
-                )
-            }",
-            "₹ ${transactionUiState.amount}",
-            MaterialTheme.typography.titleMedium,
-            MaterialTheme.colorScheme.onPrimary
-        )
-        Spacer(
-            modifier
-                .height(1.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
-        )
-        DetailRow(
-            modifier,
-            transactionUiState.accountingType.getName(),
-            transactionUiState.accountingName,
-            MaterialTheme.typography.titleSmall,
-            MaterialTheme.colorScheme.onPrimary
+fun TransactionDetails(modifier: Modifier, transactionUiState: TransactionUiState, list: List<TransactionBodyUiState>) {
+    list.forEach {
+        Column(modifier = modifier.padding(6.dp)) {
+            DetailRow(
+                modifier,
+                "",
+                transactionUiState.date,
+                MaterialTheme.typography.titleSmall,
+                MaterialTheme.colorScheme.onPrimary.copy(0.6f)
+            )
+            DetailRow(
+                modifier,
+                "${capitalizeWords(transactionUiState.transactionType.name)}ed from ${
+                    capitalizeWords(
+                        transactionUiState.account.name
+                    )
+                }",
+                "₹ ${transactionUiState.amount}",
+                MaterialTheme.typography.titleMedium,
+                MaterialTheme.colorScheme.onPrimary
+            )
+            Spacer(
+                modifier
+                    .height(1.dp)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+            )
+            DetailRow(
+                modifier,
+                it.accountingType.getName(),
+                it.accountingName,
+                MaterialTheme.typography.titleSmall,
+                MaterialTheme.colorScheme.onPrimary
 
-        )
-        Spacer(
-            modifier
-                .height(1.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
-        )
-        DetailRow(
-            modifier,
-            transactionUiState.description,
-            "",
-            MaterialTheme.typography.titleSmall,
-            MaterialTheme.colorScheme.onPrimary.copy(0.6f)
-        )
+            )
+            Spacer(
+                modifier
+                    .height(1.dp)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+            )
+            DetailRow(
+                modifier,
+                transactionUiState.description,
+                "",
+                MaterialTheme.typography.titleSmall,
+                MaterialTheme.colorScheme.onPrimary.copy(0.6f)
+            )
+        }
     }
+
 }
 
 @Composable
@@ -192,8 +194,8 @@ fun handleTransactionSubmit(addTransactionModel: AddTransactionModel) {
     val transactionUiState = addTransactionModel.transactionUiState.value
     addTransactionModel.addTransaction()
 
-    when (transactionUiState.accountingType) {
-        AccountingType.BORROWERS -> addTransactionModel.updateBorrower(
+   /* when (transactionUiState.accountingType) {
+        AccountingType.BORROWER -> addTransactionModel.updateBorrower(
             addTransactionModel.selectedBorrower.value.copy(
                 amount = addTransactionModel.selectedBorrower.value.amount + transactionUiState.amount.toDouble()
             )
@@ -205,7 +207,7 @@ fun handleTransactionSubmit(addTransactionModel: AddTransactionModel) {
             )
         )
 
-        AccountingType.INCOME -> { /* Handle income updates */
+        AccountingType.INCOME -> { *//* Handle income updates *//*
         }
 
         AccountingType.INVESTMENT -> addTransactionModel.updateInvestment(
@@ -214,7 +216,25 @@ fun handleTransactionSubmit(addTransactionModel: AddTransactionModel) {
             )
         )
 
-        AccountingType.LENDERS -> { /* Handle lenders updates */
+        AccountingType.LENDER -> { *//* Handle lenders updates *//*
+        }
+
+        AccountingType.INSURANCE -> {}
+        AccountingType.LOAN -> {
+
+        }
+        AccountingType.LOANEMI -> {
+
+        }
+        AccountingType.RETURNFROMBORROWER -> {
+
+        }
+        AccountingType.RETURNTOLENDER -> {
+
+        }
+
+        AccountingType.OTHER -> {
+            TODO()
         }
     }
 
@@ -230,5 +250,5 @@ fun handleTransactionSubmit(addTransactionModel: AddTransactionModel) {
                 balance = transactionUiState.account.balance - transactionUiState.amount.toDouble()
             )
         )
-    }
+    }*/
 }

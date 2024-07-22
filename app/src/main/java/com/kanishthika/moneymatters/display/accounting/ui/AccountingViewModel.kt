@@ -15,14 +15,23 @@ class AccountingViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    val accountingScreenList = listOf(
+        AccountingType.EXPENSE, // 0
+        AccountingType.INVESTMENT, // 1
+        AccountingType.INCOME, // 2
+        AccountingType.INSURANCE, // 3
+        AccountingType.LOAN, // 4
+        AccountingType.BORROWER, // 5
+        AccountingType.LENDER, // 6
+        AccountingType.OTHER // 7
 
-
+        )
 
 
     private val _selectedAccountingType = MutableStateFlow<AccountingType>(AccountingType.EXPENSE)
     val selectedAccountingType = _selectedAccountingType.asStateFlow()
 
-    fun updateSelectedAccountingType(accountingType: AccountingType){
+    fun updateSelectedAccountingType(accountingType: AccountingType) {
         _selectedAccountingType.value = accountingType
     }
 

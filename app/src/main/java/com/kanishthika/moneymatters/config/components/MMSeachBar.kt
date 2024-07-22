@@ -51,9 +51,9 @@ fun MMSearchBar(
     onQueryChange: (String) -> Unit,
     onClearClick: () -> Unit
 ) {
-   val interactionSource = remember {
-       MutableInteractionSource()
-   }
+    val interactionSource = remember {
+        MutableInteractionSource()
+    }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val focusRequester = remember { FocusRequester() }
@@ -63,83 +63,83 @@ fun MMSearchBar(
     val focusedColor: Color = MaterialTheme.colorScheme.primary
 
 
-        BasicTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            textStyle = LocalTextStyle.current.copy(
-                color = focusedColor,
-                fontSize = 15.sp,
-            ),
-            modifier = modifier
-                .focusRequester(focusRequester)
-                .onKeyEvent { event ->
-                    if (event.key.nativeKeyCode == android.view.KeyEvent.KEYCODE_BACK) {
-                        onClearClick()
-                        focusManager.clearFocus()
-                        true
-                    } else {
-                        false
-                    }
-                }
-                .padding(10.dp)
-                .border(
-                    1.dp,
-                    if (isFocused) focusedColor else unfocusedColor,
-                    RoundedCornerShape(50)
-                )
-                .background(
-                    MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(50)
-                )
-                .fillMaxWidth(),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            interactionSource = interactionSource,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                capitalization = KeyboardCapitalization.Characters
-            ),
-            decorationBox = { innerTextField ->
-                Row(
-                    modifier = Modifier
-                        .padding(10.dp, 6.dp)
-                        .height(30.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        modifier = modifier.padding(end = 5.dp),
-                        tint =  if (isFocused) focusedColor else unfocusedColor,
-                    )
-                    Box(Modifier.weight(1f)) {
-                        if (query.isEmpty()) Text(
-                            "Search",
-                            style = LocalTextStyle.current.copy(
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
-                                fontSize = 15.sp
-                            )
-                        )
-                        innerTextField()
-                    }
-                    if (isFocused){
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear",
-                            tint =  focusedColor,
-                            modifier = modifier.clickable {
-                                if (query.isEmpty())
-                                focusManager.clearFocus()
-                                else
-                                onClearClick()
-                            }
-                        )
-                    }
-
+    BasicTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        textStyle = LocalTextStyle.current.copy(
+            color = focusedColor,
+            fontSize = 15.sp,
+        ),
+        modifier = modifier
+            .focusRequester(focusRequester)
+            .onKeyEvent { event ->
+                if (event.key.nativeKeyCode == android.view.KeyEvent.KEYCODE_BACK) {
+                    onClearClick()
+                    focusManager.clearFocus()
+                    true
+                } else {
+                    false
                 }
             }
-        )
+            .padding(10.dp)
+            .border(
+                1.dp,
+                if (isFocused) focusedColor else unfocusedColor,
+                RoundedCornerShape(50)
+            )
+            .background(
+                MaterialTheme.colorScheme.background,
+                shape = RoundedCornerShape(50)
+            )
+            .fillMaxWidth(),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        interactionSource = interactionSource,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            capitalization = KeyboardCapitalization.Characters
+        ),
+        decorationBox = { innerTextField ->
+            Row(
+                modifier = Modifier
+                    .padding(10.dp, 6.dp)
+                    .height(30.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    modifier = modifier.padding(end = 5.dp),
+                    tint = if (isFocused) focusedColor else unfocusedColor,
+                )
+                Box(Modifier.weight(1f)) {
+                    if (query.isEmpty()) Text(
+                        "Search",
+                        style = LocalTextStyle.current.copy(
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                            fontSize = 15.sp
+                        )
+                    )
+                    innerTextField()
+                }
+                if (isFocused) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Clear",
+                        tint = focusedColor,
+                        modifier = modifier.clickable {
+                            if (query.isEmpty())
+                                focusManager.clearFocus()
+                            else
+                                onClearClick()
+                        }
+                    )
+                }
+
+            }
+        }
+    )
 
 
-    }
+}
 
 
 @Preview(showSystemUi = true)

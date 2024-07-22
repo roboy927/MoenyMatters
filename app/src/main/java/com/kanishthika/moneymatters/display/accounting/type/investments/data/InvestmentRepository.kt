@@ -1,20 +1,29 @@
 package com.kanishthika.moneymatters.display.accounting.type.investments.data
 
 import androidx.lifecycle.asLiveData
+import com.kanishthika.moneymatters.display.accounting.data.FinancialRepository
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class InvestmentRepository @Inject constructor(private val investmentDao: InvestmentDao) {
+class InvestmentRepository @Inject constructor(private val investmentDao: InvestmentDao) :
+    FinancialRepository<Investment> {
 
     val getAllInvestments = investmentDao.getAllInvestments().asLiveData()
-    suspend fun insertInvestment(investment: Investment): Long {
-        return investmentDao.insertInvestment(investment)
+
+    override fun getAllItems(): Flow<List<Investment>> {
+        return investmentDao.getAllInvestments()
     }
 
-    suspend fun updateInvestment(investment: Investment){
-        investmentDao.updateInvestment(investment)
+    override suspend fun deleteItem(item: Investment) {
+       investmentDao.deleteInvestment(item)
     }
 
-    suspend fun deleteInvestment(investment: Investment) {
-        investmentDao.deleteInvestment(investment)
+    override suspend fun updateItem(item: Investment): Int {
+       return investmentDao.updateInvestment(item)
     }
+
+    override suspend fun insertItem(item: Investment): Long {
+        return investmentDao.insertInvestment(item)
+    }
+
 }

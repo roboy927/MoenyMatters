@@ -20,9 +20,9 @@ interface InvestmentDao {
     suspend fun insertInvestment(investment: Investment) : Long
 
     @Update
-    suspend fun updateInvestment(investment: Investment)
-
+    suspend fun updateInvestment(investment: Investment) : Int
 
     @Delete
     suspend fun deleteInvestment (investment: Investment)
+
 }

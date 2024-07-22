@@ -14,8 +14,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import com.kanishthika.moneymatters.config.theme.MoneyMattersTheme
 import com.kanishthika.moneymatters.config.utils.toEpochMillisUTC
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -25,12 +23,14 @@ import java.util.Date
 @Composable
 fun MMDatePickerDialog(
     onDateSelected: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    initialDate: LocalDate?,
+    initialDisplayMode: DisplayMode
 ) {
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = LocalDate.now().toEpochMillisUTC(),
-        yearRange = IntRange(2023,2099),
-        initialDisplayMode = DisplayMode.Picker
+        initialSelectedDateMillis = initialDate?.toEpochMillisUTC(),
+        yearRange = IntRange(2000,2099),
+        initialDisplayMode = initialDisplayMode
     )
 
     val selectedDate = datePickerState.selectedDateMillis?.let {
@@ -103,15 +103,4 @@ fun MMDatePickerDialog(
 private fun convertMillisToDate(millis: Long): String {
     val formatter = SimpleDateFormat("dd MMMM yyyy")
     return formatter.format(Date(millis))
-}
-
-@Preview
-@Composable
-fun Preview() {
-    MoneyMattersTheme {
-
-        MMDatePickerDialog(onDateSelected = {}) {
-
-        }
-    }
 }

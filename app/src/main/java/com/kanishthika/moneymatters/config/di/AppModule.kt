@@ -2,13 +2,16 @@ package com.kanishthika.moneymatters.config.di
 
 import android.content.Context
 import androidx.room.Room
-import com.kanishthika.moneymatters.display.account.data.AccountDao
-import com.kanishthika.moneymatters.display.accounting.type.expenses.data.ExpenseDao
-import com.kanishthika.moneymatters.display.accounting.type.investments.data.InvestmentDao
-import com.kanishthika.moneymatters.display.accounting.type.lb.borrower.data.BorrowerDao
-import com.kanishthika.moneymatters.display.accounting.type.lb.lenders.data.LenderDao
 import com.kanishthika.moneymatters.config.database.AccountDatabase
-
+import com.kanishthika.moneymatters.display.account.data.AccountDao
+import com.kanishthika.moneymatters.display.account.data.accountType.AccountTypeDao
+import com.kanishthika.moneymatters.display.accounting.type.borrower.data.BorrowerDao
+import com.kanishthika.moneymatters.display.accounting.type.expenses.data.ExpenseDao
+import com.kanishthika.moneymatters.display.accounting.type.income.data.IncomeDao
+import com.kanishthika.moneymatters.display.accounting.type.insurance.data.InsuranceDao
+import com.kanishthika.moneymatters.display.accounting.type.insurance.data.insuranceType.InsuranceTypeDao
+import com.kanishthika.moneymatters.display.accounting.type.investments.data.InvestmentDao
+import com.kanishthika.moneymatters.display.accounting.type.lenders.data.LenderDao
 import com.kanishthika.moneymatters.display.transaction.data.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -45,5 +48,18 @@ class AppModule{
 
     @Provides
     fun provideLenderDao(accountDatabase: AccountDatabase) : LenderDao = accountDatabase.lenderDao()
+
+    @Provides
+    fun provideIncomeDao(accountDatabase: AccountDatabase) : IncomeDao = accountDatabase.incomeDao()
+
+    @Provides
+    fun provideInsuranceDao(accountDatabase: AccountDatabase) : InsuranceDao = accountDatabase.insuranceDao()
+
+    @Provides
+    fun provideInsuranceTypeDao(accountDatabase: AccountDatabase): InsuranceTypeDao = accountDatabase.insuranceTypeDao()
+
+    @Provides
+    fun provideAccountTypeDao(accountDatabase: AccountDatabase): AccountTypeDao = accountDatabase.accountTypeDao()
+
 
 }

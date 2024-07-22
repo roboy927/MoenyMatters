@@ -11,8 +11,10 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import com.kanishthika.moneymatters.R
 
 @Composable
 fun MMOutlinedTextField(
@@ -23,11 +25,12 @@ fun MMOutlinedTextField(
     readOnly: Boolean = false,
     labelText: String,
     supportingText: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     trailingIcon: @Composable (() -> Unit)? = null,
-    disableColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    disableColor: Color = MaterialTheme.colorScheme.secondary.copy(0.5f),
     focusedColor: Color = MaterialTheme.colorScheme.primary,
     unfocusedColor: Color = MaterialTheme.colorScheme.secondary,
     containerColor: Color = MaterialTheme.colorScheme.background,
@@ -43,15 +46,17 @@ fun MMOutlinedTextField(
         readOnly = readOnly,
         modifier = modifier,
         label = { Text(text = labelText) },
+        placeholder = placeholder,
         supportingText = supportingText,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         maxLines = 1,
+        singleLine = true,
         textStyle = textStyle,
         isError = isError,
         trailingIcon = trailingIcon,
         leadingIcon = leadingIcon,
-        shape = RoundedCornerShape(50),
+        shape = RoundedCornerShape(dimensionResource(id = R.dimen.uni_corner_radius)),
         colors = TextFieldDefaults.colors(
             focusedTextColor = focusedColor,
             unfocusedTextColor = unfocusedColor,
@@ -71,9 +76,9 @@ fun MMOutlinedTextField(
             focusedLabelColor = focusedColor,
             unfocusedLabelColor = unfocusedColor,
             disabledLabelColor = disableColor,
-            focusedPlaceholderColor = containerColor,
-            unfocusedPlaceholderColor = containerColor,
-            disabledPlaceholderColor = containerColor,
+            focusedPlaceholderColor = focusedColor,
+            unfocusedPlaceholderColor = focusedColor,
+            disabledPlaceholderColor = focusedColor,
             focusedSupportingTextColor = focusedColor,
             unfocusedSupportingTextColor = unfocusedColor,
             disabledSupportingTextColor = disableColor,

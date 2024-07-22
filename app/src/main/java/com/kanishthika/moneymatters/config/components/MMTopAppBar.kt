@@ -31,7 +31,8 @@ fun MMTopAppBar(
             )
         }, colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
-            titleContentColor = MaterialTheme.colorScheme.onBackground
+            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            scrolledContainerColor = MaterialTheme.colorScheme.background
         ),
         modifier = modifier,
     navigationIcon = navigationIcon,

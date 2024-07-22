@@ -1,32 +1,22 @@
 package com.kanishthika.moneymatters.display.transaction.ui.displayTransaction
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kanishthika.moneymatters.R
+import com.kanishthika.moneymatters.config.components.MMActionBarItem
+import com.kanishthika.moneymatters.config.utils.clickableOnce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -37,13 +27,24 @@ fun ActionBar(
     scope: CoroutineScope,
     bottomSheetScaffoldState: BottomSheetScaffoldState,
     isFilterActive: Boolean,
-    isSortByDate: Boolean,
-    isSortByAmount: Boolean,
-    sortByDateIcon: ImageVector,
-    sortByAmountIcon: ImageVector,
+    isAllTransactionsActive: Boolean,
     sortByDate: () -> Unit,
-    sortByAmount: () -> Unit
+    sortByAmount: () -> Unit,
+    sortByDateState: Int,
+    sortByAmountState: Int,
+    onClickAllTransactions: () -> Unit,
+    onSearch: ()-> Unit
 ) {
+    @Composable
+    fun sortingIcon(sortState: Int) : ImageVector {
+        return when (sortState) {
+            1 -> ImageVector.vectorResource(id = R.drawable.ascending)
+            2 -> ImageVector.vectorResource(id = R.drawable.descending)
+            else -> ImageVector.vectorResource(id = R.drawable.sort)
+        }
+    }
+    
+
 
     LazyRow(
         modifier = modifier
@@ -51,22 +52,31 @@ fun ActionBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
-            ActionBarItem(
+            MMActionBarItem(
                 text = "Search",
-                onClick = {
-                    scope.launch {
-                        bottomSheetScaffoldState.bottomSheetState.hide()
-                    }
+                click = Modifier.clickableOnce{
+                    onSearch()
                 },
                 modifier = modifier,
                 imageVector = Icons.Default.Search
             )
         }
         item {
-            ActionBarItem(
-                text = "Filter Transaction",
+            MMActionBarItem(
+                text = "All Transactions",
+                isActive = isAllTransactionsActive,
+                click = Modifier.clickableOnce{
+                    onClickAllTransactions()
+                },
+                modifier = modifier,
+                imageVector = Icons.Default.Menu
+            )
+        }
+        item {
+            MMActionBarItem(
+                text = "Filter",
                 isActive = isFilterActive,
-                onClick = {
+                click = Modifier.clickableOnce{
                     scope.launch {
                         bottomSheetScaffoldState.bottomSheetState.expand()
                     }
@@ -76,69 +86,25 @@ fun ActionBar(
             )
         }
         item {
-            ActionBarItem(
+            MMActionBarItem(
                 modifier = modifier,
-                isActive = isSortByAmount,
+                isActive = sortByAmountState == 1 || sortByAmountState == 2,
                 text = "Sort by Amount",
-                onClick = { sortByAmount()},
-                imageVector = sortByAmountIcon
+                click = Modifier.clickable{ sortByAmount()},
+                imageVector = sortingIcon(sortState = sortByAmountState)
             )
         }
         item {
-            ActionBarItem(
+            MMActionBarItem(
                 modifier = modifier,
-                isActive = isSortByDate,
+                isActive = sortByDateState == 1 || sortByDateState == 2,
                 text = "Sort by Date",
-                onClick = { sortByDate() },
-                imageVector = sortByDateIcon
+                click = Modifier.clickable { sortByDate() },
+                imageVector = sortingIcon(sortState = sortByDateState)
             )
         }
     }
 }
-
-@Composable
-fun ActionBarItem(
-    text: String,
-    onClick: () -> Unit,
-    isActive: Boolean = false,
-    modifier: Modifier,
-    imageVector: ImageVector
-) {
-    Row(
-        modifier = modifier
-            .clickable {
-                onClick()
-            }
-            .background(
-                if (!isActive) Color.Transparent else MaterialTheme.colorScheme.tertiaryContainer.copy(
-                    0.5f
-                ), RoundedCornerShape(30)
-            )
-            .border(
-                0.5.dp,
-                if (!isActive) MaterialTheme.colorScheme.outline.copy(
-                    0.6f
-                ) else MaterialTheme.colorScheme.tertiaryContainer,
-                RoundedCornerShape(30)
-            )
-            .padding(6.dp, 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector,
-            contentDescription = "null",
-            tint = MaterialTheme.colorScheme.onBackground.copy(0.6f),
-            modifier = modifier.size(20.dp)
-        )
-        Spacer(modifier = modifier.width(4.dp))
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onBackground.copy(0.8f),
-            fontSize = 14.sp
-        )
-    }
-}
-
 
 
 

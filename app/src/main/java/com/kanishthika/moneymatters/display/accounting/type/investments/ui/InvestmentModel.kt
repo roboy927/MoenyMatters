@@ -1,72 +1,28 @@
 package com.kanishthika.moneymatters.display.accounting.type.investments.ui
 
-import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.kanishthika.moneymatters.config.utils.capitalizeWords
+import com.kanishthika.moneymatters.display.accounting.data.AccountingType
+import com.kanishthika.moneymatters.display.accounting.data.FinancialRepository
 import com.kanishthika.moneymatters.display.accounting.type.investments.data.Investment
-import com.kanishthika.moneymatters.display.accounting.type.investments.data.InvestmentRepository
+import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.BaseFinancialModel
+import com.kanishthika.moneymatters.display.transaction.data.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class InvestmentModel @Inject constructor(
-    private val investmentRepository: InvestmentRepository
-) : ViewModel() {
+    repository: FinancialRepository<Investment>,
+    transactionRepository: TransactionRepository
+) : BaseFinancialModel<Investment>(repository, transactionRepository) {
 
-    private val _investmentUiState = MutableStateFlow(InvestmentUiState())
-    val investmentUiState = _investmentUiState.asStateFlow()
+    override fun getAccountingType(): AccountingType = AccountingType.INVESTMENT
 
-    fun updateName(name: String) {
-        _investmentUiState.update {
-            it.copy(
-                name = name
-            )
-        }
-    }
-    fun updateAmount(amount: String) {
-        _investmentUiState.update {
-            it.copy(
-                amount = amount
-            )
-        }
-    }
-    fun updateDescription(description: String) {
-        _investmentUiState.update {
-            it.copy(
-                description = description
-            )
-        }
-    }
-
-    fun addInvestment() {
-        viewModelScope.launch {
-            try {
-                val investmentId = investmentRepository.insertInvestment(
-                    Investment(
-                        id = 0,
-                        name = investmentUiState.value.name,
-                        description = investmentUiState.value.description,
-                        amount = investmentUiState.value.amount.toDouble()
-                    )
-                )
-                if (investmentId > 0L) {
-                    updateAmount("")
-                    updateDescription("")
-                    updateName("")
-                }
-            } catch (e: Exception) {
-                Log.e("ADD_INVESTMENT", "submit: $e ", e)
-            }
-        }
-    }
-
-    val getAllInvestment = investmentRepository.getAllInvestments
-
-    fun isAnyFieldIsEmpty(uiState: InvestmentUiState): Boolean {
-        return uiState.name.isEmpty() || uiState.amount.isEmpty() || uiState.description.isEmpty()
+    override fun createNewItem(): Investment {
+        return Investment(
+            id = 0,
+            name = capitalizeWords(uiState.value.name),
+            amount = uiState.value.amount.toDouble(),
+            description = capitalizeWords(uiState.value.description)
+        )
     }
 }

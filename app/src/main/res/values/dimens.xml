@@ -4,4 +4,5 @@
     <dimen name="form_spacing">24dp</dimen>
     <dimen name="uni_screen_padding">24dp</dimen>
     <dimen name="uni_box_padding">16dp</dimen>
+    <dimen name="uni_corner_radius">10dp</dimen>
 </resources>

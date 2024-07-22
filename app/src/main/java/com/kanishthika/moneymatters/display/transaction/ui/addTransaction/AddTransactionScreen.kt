@@ -1,47 +1,50 @@
 package com.kanishthika.moneymatters.display.transaction.ui.addTransaction
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kanishthika.moneymatters.R
-import com.kanishthika.moneymatters.config.components.MMDatePickerInput
-import com.kanishthika.moneymatters.config.components.MMDropDownMenu
-import com.kanishthika.moneymatters.config.components.MMOutlinedTextField
+import com.kanishthika.moneymatters.config.components.MMBottomAppBarButton
 import com.kanishthika.moneymatters.config.components.MMTopAppBar
 import com.kanishthika.moneymatters.config.navigation.NavigationItem
-import com.kanishthika.moneymatters.config.utils.clickableOnce
-import com.kanishthika.moneymatters.display.accounting.data.getName
-import com.kanishthika.moneymatters.display.transaction.data.TransactionType
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.element.PageIndicators
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.element.TransactionHeadPart
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.element.TransactionSplitDetail
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.element.getSplitPageCount
+import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AddTransactionScreen(
     addTransactionModel: AddTransactionModel,
@@ -50,118 +53,122 @@ fun AddTransactionScreen(
 ) {
 
     val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
     val transactionUiState by addTransactionModel.transactionUiState.collectAsState()
-    val accountList = addTransactionModel.getAllAccounts.observeAsState(emptyList())
-    var accountingTypeList = addTransactionModel.accountingTypeList(TransactionType.DEBIT)
+    val transactionBodyUiState by addTransactionModel.transactionBodyUiState.collectAsState()
 
-    Scaffold(
-        modifier = Modifier.imePadding(),
-        topBar = {
-            MMTopAppBar(titleText = "Add Transaction")
-        },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = if (addTransactionModel.isAnyFieldIsEmpty(transactionUiState))
-                    MaterialTheme.colorScheme.tertiaryContainer.copy(0.5f) else MaterialTheme.colorScheme.tertiaryContainer,
-                modifier = modifier
-                    .height(50.dp)
-                    .fillMaxWidth()
-                    .clickableOnce(
-                        enabled =
-                        !addTransactionModel.isAnyFieldIsEmpty(transactionUiState)
-                    ) {
-                        navController.navigate(
-                            NavigationItem.SelectAccounting.createRoute(
-                                addTransactionModel.transactionUiState.value.accountingType.getName()
-                            )
-                        )
-                        focusManager.clearFocus()
-                        addTransactionModel.isDialogOpenChanged(true)
-                    }
-            ) {
-                Column(
-                    modifier = modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Next",
-                        color = if (addTransactionModel.isAnyFieldIsEmpty(transactionUiState))
-                            MaterialTheme.colorScheme.onTertiaryContainer.copy(0.5f) else MaterialTheme.colorScheme.onTertiaryContainer,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+    val pagerState = rememberPagerState {
+        getSplitPageCount(transactionUiState.splitOptions)
+    }
+    val currentPageNumber =
+        if (transactionBodyUiState.size > pagerState.currentPage) pagerState.currentPage else 0
+    val accountList by addTransactionModel.getAllAccounts.observeAsState(emptyList())
+    val accountTypeList by addTransactionModel.accountingTypeList.collectAsState()
+    val financialItemList by addTransactionModel.getAccountingNameList(transactionBodyUiState[currentPageNumber].accountingType)
+        .collectAsState(initial = emptyList())
 
-            }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect {
+            // Perform an action when the page changes
+            focusManager.clearFocus()
         }
-    ) { it ->
-        Column(
+    }
+
+    BackHandler {
+        navController.popBackStack()
+    }
+
+    Scaffold(modifier = Modifier.imePadding(), topBar = {
+        MMTopAppBar(titleText = "Add Transaction")
+    }, bottomBar = {
+        MMBottomAppBarButton(
+            bottomBarText = "Next", enabled = !addTransactionModel.isAnyFieldIsEmpty(
+                transactionUiState, transactionBodyUiState
+            ), modifier = modifier
+        ) {
+            navController.navigate(NavigationItem.TransactionSummaryDialog.route)
+            focusManager.clearFocus()
+        }
+    }) { paddingValue ->
+        LazyColumn(
             modifier
-                .padding(it)
+                .padding(paddingValue)
                 .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(scrollState)
+                .animateContentSize()
                 .padding(dimensionResource(id = R.dimen.uni_screen_padding)),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.form_spacing)),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            MMDatePickerInput(
-                modifier = modifier,
-                date = transactionUiState.date,
-                onDateSelected = { addTransactionModel.updateDate(it) }
-            )
-
-            MMDropDownMenu(
-                list = accountList.value,
-                name = transactionUiState.account.name,
-                modifier = modifier,
-                labelText = "Account",
-                itemToName = { it.name + "  [" + it.balance + "]" },
-                onItemSelected = {
-                    addTransactionModel.updateSelectedAccount(it)
-                    focusManager.moveFocus(FocusDirection.Next)
-                },
-            )
-
-            MMOutlinedTextField(
-                value = transactionUiState.description,
-                onValueChange = { addTransactionModel.updateDescription(it) },
-                labelText = "Description",
-                modifier = modifier
-                    .fillMaxWidth(),
-                keyboardActions = KeyboardActions {
-                    focusManager.moveFocus(FocusDirection.Next)
-                }
-            )
-
-            MMOutlinedTextField(
-                modifier = modifier.fillMaxWidth(),
-                value = transactionUiState.amount,
-                onValueChange = { addTransactionModel.updateAmount(it) },
-                labelText = "Amount",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-            )
-
-            TextSwitch(
-                modifier = modifier,
-                selectedTxnType = transactionUiState.transactionType
-            ) { transactionType ->
-                addTransactionModel.changeTxnType(transactionType)
-                accountingTypeList = addTransactionModel.accountingTypeList(transactionType)
-                addTransactionModel.changeAccountingType(accountingTypeList[0])
+            item {
+                TransactionHeadPart(modifier = modifier.animateItemPlacement(),
+                    selectedDate = transactionUiState.date,
+                    onDateSelected = {
+                        addTransactionModel.updateDate(it)
+                        focusManager.moveFocus(FocusDirection.Next)
+                    },
+                    accountList = accountList,
+                    selectedAccountName = transactionUiState.account.name,
+                    onAccountSelected = {
+                        addTransactionModel.updateSelectedAccount(it)
+                        focusManager.moveFocus(FocusDirection.Next)
+                    },
+                    selectedTxnType = transactionUiState.transactionType,
+                    onChangeTXnType = { transactionType ->
+                        addTransactionModel.changeTxnType(transactionType)
+                    },
+                    splitOptions = transactionUiState.splitOptions,
+                    description = transactionUiState.description,
+                    onDescriptionChange = { addTransactionModel.updateDescription(it) },
+                    focusNext = KeyboardActions { focusManager.moveFocus(FocusDirection.Next) },
+                    amount = transactionUiState.amount,
+                    onAmountChange = { addTransactionModel.updateAmount(it) },
+                    onSplitOptionChange = {
+                        coroutineScope.launch {
+                            addTransactionModel.changeSplitOption(it)
+                        }
+                    },
+                    divideOptions = transactionUiState.divideOptions,
+                    onDivideOptionChange = { addTransactionModel.changeDivideOption(it) })
             }
-
-            MMDropDownMenu(
-                list = accountingTypeList,
-                modifier = Modifier,
-                name = transactionUiState.accountingType.getName(),
-                labelText = "Accounting",
-                itemToName = { it.getName() },
-                onItemSelected = {
-                    addTransactionModel.changeAccountingType(it)
-                },
-            )
+            item {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .animateContentSize()
+                ) {
+                    if (pagerState.pageCount > 1) {
+                        PageIndicators(pagerState = pagerState, modifier)
+                        Spacer(modifier = modifier.height(20.dp))
+                    }
+                    HorizontalPager(state = pagerState) {
+                        TransactionSplitDetail(modifier = modifier,
+                            splitOptions = transactionUiState.splitOptions,
+                            splitAmount = transactionBodyUiState[currentPageNumber].splitAmount,
+                            onSplitAmountChange = {
+                                addTransactionModel.updateSplitAmount(it, currentPageNumber)
+                            },
+                            splitDescription = transactionBodyUiState[currentPageNumber].description,
+                            onSplitDescriptionChange = {
+                                addTransactionModel.updateSplitDescription(it, currentPageNumber)
+                            },
+                            accountingTypeList = accountTypeList,
+                            selectedAccountingType = transactionBodyUiState[currentPageNumber].accountingType,
+                            onAccountingTypeChange = {
+                                addTransactionModel.changeAccountingType(it, currentPageNumber)
+                                focusManager.moveFocus(FocusDirection.Next)
+                            },
+                            financialItemList = financialItemList,
+                            selectedFinancialItem = transactionBodyUiState[currentPageNumber].accountingName,
+                            onFinancialItemChange = {
+                                addTransactionModel.changeAccountingName(it.name, currentPageNumber)
+                                focusManager.moveFocus(FocusDirection.Next)
+                            },
+                            inputNumberOnly = KeyboardType.Decimal,
+                            moveNext = KeyboardActions { focusManager.moveFocus(FocusDirection.Next) })
+                    }
+                }
+            }
         }
     }
 }

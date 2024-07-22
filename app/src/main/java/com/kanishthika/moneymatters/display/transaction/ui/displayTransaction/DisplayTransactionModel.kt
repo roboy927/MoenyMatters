@@ -1,18 +1,12 @@
 package com.kanishthika.moneymatters.display.transaction.ui.displayTransaction
 
-import android.icu.text.SimpleDateFormat
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kanishthika.moneymatters.R
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
+import com.kanishthika.moneymatters.config.utils.convertDateToMonthYearString
 import com.kanishthika.moneymatters.config.utils.convertToLocalDate
 import com.kanishthika.moneymatters.display.account.data.AccountRepository
-import com.kanishthika.moneymatters.display.accounting.data.AccountingType
 import com.kanishthika.moneymatters.display.accounting.data.getAllAccountingTypes
 import com.kanishthika.moneymatters.display.accounting.data.getName
 import com.kanishthika.moneymatters.display.transaction.data.Transaction
@@ -21,16 +15,15 @@ import com.kanishthika.moneymatters.display.transaction.data.TransactionType
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.filterBottomSheet.FirstLevelFilter
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.filterBottomSheet.TransactionFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,33 +38,97 @@ class DisplayTransactionModel @Inject constructor(
     private val _transactions = MutableStateFlow<List<Transaction>>(emptyList())
     val transactions = _transactions.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
+
+    var monthFilter: List<String> = emptyList()
+    var accountFilter: List<String> = emptyList()
+    var transactionTypeFilter: List<String> = emptyList()
+    var accountingTypeFilter: List<String> = emptyList()
+
     init {
-        fetchAllTransactions()
+        initializeFilters()
+        loadTransactions()
+    }
+
+    private fun initializeFilters() {
+        viewModelScope.launch {
+            val currentMonthYear =
+                convertDateToMonthYearString(LocalDate.now().toString(), "yyyy-MM-dd")
+            val monthList = transactionRepository.getDistinctMonthYearStrings().first()
+            val indexOfCurrentMonth = monthList.indexOf(currentMonthYear)
+
+            _displayTransactionUiState.update {
+                val updatedCheckBoxStates = it.checkBoxStates.toMutableMap()
+                if (indexOfCurrentMonth != -1) {
+                    updatedCheckBoxStates[FirstLevelFilter.Month] = setOf(indexOfCurrentMonth)
+                }
+                val updatedCheckboxCountState = it.checkboxCountState.toMutableMap()
+                updatedCheckboxCountState[FirstLevelFilter.Month] =
+                    if (indexOfCurrentMonth != -1) 1 else 0
+
+                it.copy(
+                    checkBoxStates = updatedCheckBoxStates,
+                    checkboxCountState = updatedCheckboxCountState,
+                    filterByMonth = listOf(currentMonthYear)
+                )
+            }
+            monthFilter = listOf(currentMonthYear)
+        }
+    }
+
+    private fun loadTransactions() {
+        viewModelScope.launch {
+            delay(1500)
+            transactionRepository.getTransactions().map { transactions ->
+                transactions.filter {
+                    convertDateToMonthYearString(it.date, "dd MMMM yyyy") ==
+                            convertDateToMonthYearString(LocalDate.now().toString(), "yyyy-MM-dd")
+                }
+            }.collect { filteredList ->
+                _transactions.value = filteredList.reversed()
+                _isLoading.value = false
+            }
+        }
     }
 
     fun fetchAllTransactions() {
+        makeFilterStateEmpty()
         viewModelScope.launch {
+            _isLoading.value = true
+            delay(1500)
             transactionRepository.getTransactions()
-                .collect { allTransactions ->
-                    _transactions.value = allTransactions
+                .collect { transactions ->
+                    _transactions.value = transactions.reversed()
+                    _isLoading.value = false
                 }
         }
     }
 
-    private var filteredTransaction = emptyList<Transaction>()
+    fun isAllTransactionStateChanged() {
+        _displayTransactionUiState.update {
+            it.copy(
+                isAllTransactionSelected = !_displayTransactionUiState.value.isAllTransactionSelected
+            )
+        }
+    }
+
     fun filterTransactions() {
         updateFilterToUiState()
+        val filter = TransactionFilter(
+            accounts = _displayTransactionUiState.value.filterByAccount,
+            month = _displayTransactionUiState.value.filterByMonth,
+            types = _displayTransactionUiState.value.filterByTransactionType,
+            accountingTypes = _displayTransactionUiState.value.filterByAccountingType,
+        )
         viewModelScope.launch {
-            val filter = TransactionFilter(
-                accounts = _displayTransactionUiState.value.filterByAccount,
-                month = _displayTransactionUiState.value.filterByMonth,
-                types = _displayTransactionUiState.value.filterByTransactionType,
-                accountingTypes = _displayTransactionUiState.value.filterByAccountingType,
-            )
+            _isLoading.value = true
+            delay(1500)
             transactionRepository.getTransactions()
                 .map { transactions ->
                     transactions.filter { transaction ->
-                        val monthYear = convertDateToMonthYear(transaction.date)
+                        val monthYear =
+                            convertDateToMonthYearString(transaction.date, "dd MMMM yyyy")
                         (filter.month.isEmpty() || filter.month.contains(monthYear)) &&
                                 (filter.accounts.isEmpty() || filter.accounts.contains(transaction.account)) &&
                                 (filter.types.isEmpty() || filter.types.contains(transaction.type)) &&
@@ -84,77 +141,51 @@ class DisplayTransactionModel @Inject constructor(
                     }
                 }
                 .collect { filteredList ->
-                    _transactions.value = filteredList
-                    filteredTransaction = filteredList
+                    _transactions.value = filteredList.reversed()
+                    _isLoading.value = false
                 }
+        }
+        Log.d("rushit", "filterTransactions: ${_displayTransactionUiState.value.filterByMonth}")
+        if (filter.accounts.isEmpty() &&
+            filter.month.isEmpty() &&
+            filter.types.isEmpty() &&
+            filter.accountingTypes.isEmpty()
+        ) {
+            _displayTransactionUiState.update {
+                it.copy(
+                    isAllTransactionSelected = true
+                )
+            }
+        } else {
+            _displayTransactionUiState.update {
+                it.copy(
+                    isAllTransactionSelected = false
+                )
+            }
         }
     }
 
-
     fun sortByDateAscending() {
-        viewModelScope.launch {
-            transactionRepository.getTransactions()
-                .map { transactions ->
-                    transactions.sortedBy { convertToLocalDate(it.date, "dd MMMM yyyy") }
-                }
-                .collect { sortedList ->
-                    _transactions.value = sortedList
-                }
+        _transactions.value = _transactions.value.sortedBy {
+            convertToLocalDate(it.date, "dd MMMM yyyy")
         }
     }
 
     fun sortByDateDescending() {
-        viewModelScope.launch {
-            transactionRepository.getTransactions()
-                .map { transactions ->
-                    transactions.sortedByDescending { convertToLocalDate(it.date, "dd MMMM yyyy") }
-                }
-                .collect { sortedList ->
-                    _transactions.value = sortedList
-                }
+        _transactions.value = _transactions.value.sortedByDescending {
+            convertToLocalDate(it.date, "dd MMMM yyyy")
         }
     }
 
     fun sortByAmountAscending() {
-        viewModelScope.launch {
-            transactionRepository.getTransactions()
-                .map { transactions ->
-                    transactions.sortedBy { it.amount }
-                }
-                .collect { sortedList ->
-                    _transactions.value = sortedList
-                }
+        _transactions.value = _transactions.value.sortedBy {
+            it.amount
         }
     }
 
     fun sortByAmountDescending() {
-        viewModelScope.launch {
-            transactionRepository.getTransactions()
-                .map { transactions ->
-                    transactions.sortedByDescending { it.amount }
-                }
-                .collect { sortedList ->
-                    _transactions.value = sortedList
-                }
-        }
-    }
-
-    @Composable
-    fun getIcon(accountingType: AccountingType): ImageVector {
-        return when (accountingType) {
-            AccountingType.BORROWERS -> ImageVector.vectorResource(id = R.drawable.b_accounting)
-            AccountingType.EXPENSE -> ImageVector.vectorResource(id = R.drawable.e_accounting)
-            AccountingType.INCOME -> ImageVector.vectorResource(id = R.drawable.i_accounting)
-            AccountingType.INVESTMENT -> ImageVector.vectorResource(id = R.drawable.i_accounting)
-            AccountingType.LENDERS -> ImageVector.vectorResource(id = R.drawable.l_accounting)
-        }
-    }
-
-    @Composable
-    fun getIconBackground(transactionType: TransactionType): Color {
-        return when (transactionType) {
-            TransactionType.CREDIT -> MaterialTheme.colorScheme.primary.copy(0.8f)
-            TransactionType.DEBIT -> MaterialTheme.colorScheme.secondary.copy(0.8f)
+        _transactions.value = _transactions.value.sortedByDescending {
+            it.amount
         }
     }
 
@@ -171,7 +202,7 @@ class DisplayTransactionModel @Inject constructor(
     private val accountNamesList = accountList.map { accounts ->
         accounts.map { account -> capitalizeWords(account.name) }
     }
-    private var monthList = getDistinctMonthYearStrings()
+    private var monthList = transactionRepository.getDistinctMonthYearStrings()
 
     private val transactionTypeList = flow {
         emit(TransactionType.values().map { capitalizeWords(it.name) })
@@ -235,10 +266,6 @@ class DisplayTransactionModel @Inject constructor(
         }
     }
 
-    var monthFilter: List<String> = emptyList()
-    var accountFilter: List<String> = emptyList()
-    var transactionTypeFilter: List<String> = emptyList()
-    var accountingTypeFilter: List<String> = emptyList()
 
     private fun makeLocalFilterEmpty() {
         accountFilter = emptyList()
@@ -279,7 +306,7 @@ class DisplayTransactionModel @Inject constructor(
         }
     }
 
-    private fun updateFilterToUiState() {
+    fun updateFilterToUiState() {
         _displayTransactionUiState.update {
             it.copy(
                 filterByAccount = accountFilter,
@@ -288,41 +315,21 @@ class DisplayTransactionModel @Inject constructor(
                 filterByAccountingType = accountingTypeFilter
             )
         }
-
     }
 
-    private fun getDistinctMonthYearStrings(): Flow<List<String>> {
-        val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
-        val monthYearFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
-
-        return transactionRepository.getTransactions().map { transactions ->
-            transactions.map { transaction ->
-                val transactionDate = LocalDate.parse(transaction.date, dateFormatter)
-                transactionDate.format(monthYearFormatter)
-            }.distinct()
+    private fun makeFilterStateEmpty() {
+        makeLocalFilterEmpty()
+        _displayTransactionUiState.update {
+            it.copy(
+                filterByAccount = emptyList(),
+                filterByMonth = emptyList(),
+                filterByTransactionType = emptyList(),
+                filterByAccountingType = emptyList(),
+                checkBoxStates = it.checkBoxStates.mapValues { (_, _) -> emptySet() },
+                checkboxCountState = it.checkboxCountState.mapValues { (_, _) -> 0 }
+            )
         }
     }
-
-    @Composable
-    fun getSortingIcon(sortState: Int): ImageVector {
-        return when (sortState) {
-            1 -> ImageVector.vectorResource(id = R.drawable.ascending)
-            2 -> ImageVector.vectorResource(id = R.drawable.descending)
-            else -> ImageVector.vectorResource(id = R.drawable.sort)
-        }
-    }
-}
-
-fun convertDateToMonthYear(inputDate: String): String {
-    // Define the input and output date formats
-    val inputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
-    val outputFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-
-    // Parse the input date
-    val date = inputFormat.parse(inputDate)
-
-    // Format the date to the desired output format
-    return outputFormat.format(date)
 }
 
 

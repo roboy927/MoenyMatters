@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -38,17 +39,15 @@ fun TransactionDetail(
     transactionType: TransactionType,
     icon: ImageVector,
     iconBackground: Color
-){
+) {
     Surface(
         color = MaterialTheme.colorScheme.background
     ) {
-
         Column(
             modifier = modifier
                 .padding(8.dp, 10.dp)
                 .fillMaxWidth()
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -61,19 +60,18 @@ fun TransactionDetail(
                     Icon(
                         imageVector = icon,
                         contentDescription = "to be changed",
-                        modifier = modifier.padding(6.dp),
+                        modifier = modifier.padding(6.dp).size(20.dp),
                     )
                 }
                 Spacer(modifier = modifier.width(10.dp))
-
-                Row (
+                Row(
                     modifier = modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    Column (
+                ) {
+                    Column(
                         modifier = modifier.weight(1f)
-                    ){
+                    ) {
                         Text(
                             text = accountingName,
                             style = MaterialTheme.typography.titleSmall,
@@ -96,15 +94,15 @@ fun TransactionDetail(
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         fontWeight = FontWeight.Light
 
-                        )
+                    )
                 }
             }
             Spacer(modifier = modifier.height(6.dp))
-            Row (
+            Row(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
                     text = date,
                     style = MaterialTheme.typography.bodySmall,
@@ -112,7 +110,7 @@ fun TransactionDetail(
                     fontWeight = FontWeight.Light
                 )
                 Text(
-                    text = when(transactionType){
+                    text = when (transactionType) {
                         TransactionType.CREDIT -> "Credited to $account"
                         TransactionType.DEBIT -> "Debited from $account"
                     },

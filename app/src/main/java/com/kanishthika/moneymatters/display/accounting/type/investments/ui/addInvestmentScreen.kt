@@ -1,109 +1,96 @@
 package com.kanishthika.moneymatters.display.accounting.type.investments.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.kanishthika.moneymatters.config.components.MMColumnScaffoldContentColumn
-import com.kanishthika.moneymatters.config.components.MMOutlinedTextField
-import com.kanishthika.moneymatters.config.components.MMTopAppBar
-import com.kanishthika.moneymatters.config.utils.clickableOnce
+import androidx.navigation.NavController
+import com.kanishthika.moneymatters.config.utils.capitalizeWords
+import com.kanishthika.moneymatters.display.accounting.type.investments.data.Investment
+import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.AddOrUpdateItemScreen
+import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.MMOutlinedTextFieldWithState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddInvestmentScreen(
-    investmentModel: InvestmentModel, modifier: Modifier
+    investmentModel: InvestmentModel,
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    investment: Investment? = null,
 ) {
 
-    val investmentUiState by investmentModel.investmentUiState.collectAsState()
+    val investmentUiState by investmentModel.uiState.collectAsState()
+    var investmentEditEnabled by remember { mutableStateOf(true) }
 
-    val focusManager = LocalFocusManager.current
-
-    Scaffold(
-        modifier = modifier.imePadding(),
-        topBar = { MMTopAppBar(titleText = "Add Investment") },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = if (investmentModel.isAnyFieldIsEmpty(investmentUiState))
-                    MaterialTheme.colorScheme.tertiaryContainer.copy(0.5f) else MaterialTheme.colorScheme.tertiaryContainer,
-                modifier = modifier
-                    .height(50.dp)
-                    .fillMaxWidth()
-                    .clickableOnce(
-                        enabled =
-                        !investmentModel.isAnyFieldIsEmpty(investmentUiState)
-                    ) {
-                        investmentModel.addInvestment()
-                        focusManager.clearFocus()
-                    }
-            ) {
-                Column(
-                    modifier = modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Next",
-                        color = if (investmentModel.isAnyFieldIsEmpty(investmentUiState))
-                            MaterialTheme.colorScheme.onTertiaryContainer.copy(0.5f) else MaterialTheme.colorScheme.onTertiaryContainer,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
+    LaunchedEffect(Unit) {
+        if (investment != null) {
+            investmentModel.updateName(investment.name)
+            investmentModel.updateDescription(investment.description)
+            investmentModel.updateAmount(investment.amount.toString())
+            investmentModel.isEditEnabled(capitalizeWords(investment.name)) {
+                investmentEditEnabled = it
             }
         }
-    ) { it ->
-        MMColumnScaffoldContentColumn(
-            modifier = modifier, scaffoldPaddingValues = it
-        ) {
-            MMOutlinedTextField(
-                modifier = modifier.fillMaxWidth(),
-                value = investmentUiState.name,
-                onValueChange = { input ->
-                    investmentModel.updateName(input)
-                },
-                labelText = "Name",
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next
-                )
+    }
+
+    AddOrUpdateItemScreen(
+        viewModel = investmentModel,
+        modifier = modifier,
+        navController = navController,
+        screenTitle = "Add Investment",
+        buttonText = if (investment == null) "Add" else "Update",
+        isEnabled = investmentModel.isAnyFieldIsEmpty(investmentUiState).not()
+    ) {
+        MMOutlinedTextFieldWithState(
+            enabled = investmentEditEnabled,
+            value = investmentUiState.name,
+            onValueChange = { investmentModel.updateName(it) },
+            labelText = "Name",
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Next
             )
-            MMOutlinedTextField(
-                modifier = modifier.fillMaxWidth(),
-                value = investmentUiState.description,
-                onValueChange = { investmentModel.updateDescription(it) },
-                labelText = "Description",
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next
-                )
+        )
+        MMOutlinedTextFieldWithState(
+            value = investmentUiState.description,
+            onValueChange = { investmentModel.updateDescription(it) },
+            labelText = "Description",
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Next
             )
-            MMOutlinedTextField(
-                modifier = modifier.fillMaxWidth(),
-                value = investmentUiState.amount,
-                onValueChange = { investmentModel.updateAmount(it) },
-                labelText = "Amount",
-                supportingText = { Text(text = "Total Amount that Invested") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done
-                )
+        )
+        MMOutlinedTextFieldWithState(
+            enabled = investmentEditEnabled,
+            value = investmentUiState.amount,
+            onValueChange = { investmentModel.updateAmount(it) },
+            labelText = "Amount",
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Done
             )
+        )
+        if (!investmentEditEnabled) {
+            Box(
+                modifier = modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "* You can't edit expense name and amount, Because it is used in one or more transaction",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

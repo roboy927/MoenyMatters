@@ -23,9 +23,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.kanishthika.moneymatters.config.components.MMColumnScaffoldContentColumn
+import com.kanishthika.moneymatters.config.components.MMDropDownMenu
 import com.kanishthika.moneymatters.config.components.MMOutlinedTextField
 import com.kanishthika.moneymatters.config.components.MMTopAppBar
+import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.utils.clickableOnce
 
 
@@ -33,11 +36,12 @@ import com.kanishthika.moneymatters.config.utils.clickableOnce
 @Composable
 fun AddAccountScreen (
     accountViewModel: AccountViewModel,
-    modifier: Modifier = Modifier
-
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
 
     val accountUiState by accountViewModel.uiState.collectAsState()
+    val accountType by accountViewModel.accountType.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -84,9 +88,24 @@ fun AddAccountScreen (
                 labelText = "Name",
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Characters,
+                    capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Next
                 )
+            )
+
+            MMDropDownMenu(
+                list = accountType,
+                name = accountUiState.type.name,
+                modifier = modifier ,
+                itemToName = { item -> item.name} ,
+                onItemSelected = {
+                    if (it.name == "Add New"){
+                        navController.navigate(NavigationItem.AddAccountType.route)
+                    } else {
+                        accountViewModel.updateType(it)
+                    }
+                                 },
+                labelText = "Type"
             )
 
             MMOutlinedTextField(

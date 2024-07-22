@@ -26,7 +26,8 @@ fun <T : Any> MMDropDownMenu(
     itemToName: (T) -> String,
     onItemSelected: (T) -> Unit,
     onExpandedChange: (Boolean) -> Unit = {},
-    labelText: String
+    labelText: String,
+    enabled: Boolean = true
 ) {
     val expandedState = remember { mutableStateOf(expanded) }
 
@@ -38,6 +39,7 @@ fun <T : Any> MMDropDownMenu(
         },
     ) {
         MMOutlinedTextField(
+            enabled = enabled,
             value = name,
             modifier = modifier
                 .menuAnchor()

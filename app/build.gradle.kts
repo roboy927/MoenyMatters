@@ -123,5 +123,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.0-alpha04")
     implementation(kotlin("reflect"))
 
+    implementation ("com.google.code.gson:gson:2.8.7")
 
 }
+
+

@@ -2,10 +2,8 @@ package com.kanishthika.moneymatters.config.utils
 
 import android.icu.text.SimpleDateFormat
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.util.Locale
 
 fun LocalDate.toEpochMillis(
@@ -30,12 +28,14 @@ fun convertToLocalDate(dateString: String, pattern: String = "dd/MM/yyyy"): Loca
     return LocalDate.parse(dateString, dateFormatter)
 }
 
-fun createMonthListForYear(year: Int): List<String> {
-    val monthList = mutableListOf<String>()
-    for (month in 1..12) {
-        val yearMonth = YearMonth.of(year, month)
-        val monthName = yearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
-        monthList.add("$monthName $year")
-    }
-    return monthList
+fun convertDateToMonthYearString(inputDate: String, inputFormatPattern: String): String {
+    // Define the input and output date formats
+    val inputFormat = SimpleDateFormat(inputFormatPattern, Locale.getDefault())
+    val outputFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+
+    // Parse the input date
+    val date = inputFormat.parse(inputDate)
+
+    // Format the date to the desired output format
+    return outputFormat.format(date)
 }

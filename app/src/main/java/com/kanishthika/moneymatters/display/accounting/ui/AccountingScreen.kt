@@ -1,91 +1,139 @@
 package com.kanishthika.moneymatters.display.accounting.ui
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryScrollableTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.kanishthika.moneymatters.display.accounting.data.accountingBottomNavigation
-import com.kanishthika.moneymatters.display.accounting.ui.element.AccountingBottomNavigation
-import com.kanishthika.moneymatters.config.components.MMSearchBar
-import com.kanishthika.moneymatters.config.navigation.AccountingNavHost
-import com.kanishthika.moneymatters.config.navigation.Screen
+import com.kanishthika.moneymatters.config.components.MMTopAppBar
+import com.kanishthika.moneymatters.display.accounting.data.getName
+import com.kanishthika.moneymatters.display.accounting.type.borrower.ui.BorrowerListScreen
+import com.kanishthika.moneymatters.display.accounting.type.borrower.ui.BorrowerModel
+import com.kanishthika.moneymatters.display.accounting.type.expenses.ui.ExpenseListScreen
+import com.kanishthika.moneymatters.display.accounting.type.expenses.ui.ExpenseModel
+import com.kanishthika.moneymatters.display.accounting.type.income.ui.IncomeListScreen
+import com.kanishthika.moneymatters.display.accounting.type.income.ui.IncomeModel
+import com.kanishthika.moneymatters.display.accounting.type.insurance.ui.InsuranceListScreen
+import com.kanishthika.moneymatters.display.accounting.type.insurance.ui.InsuranceModel
+import com.kanishthika.moneymatters.display.accounting.type.investments.ui.InvestmentListScreen
+import com.kanishthika.moneymatters.display.accounting.type.investments.ui.InvestmentModel
+import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.LenderListScreen
+import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.LenderModel
+import kotlinx.coroutines.launch
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountingScreen(
     modifier: Modifier,
-    appNavController: NavController,
-    accountingViewModel: AccountingViewModel
-) {
+    navController: NavController,
+    accountingViewModel: AccountingViewModel,
+    investmentModel: InvestmentModel,
+    expenseModel: ExpenseModel,
+    incomeModel: IncomeModel,
+    lenderModel: LenderModel,
+    borrowerModel: BorrowerModel,
+    insuranceModel: InsuranceModel
+    ){
 
-    val accountingNavController = rememberNavController()
-
-
-    val searchText by accountingViewModel.searchText.observeAsState("")
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState { accountingViewModel.accountingScreenList.size }
+    val selectedTabIndex = remember {
+        derivedStateOf { pagerState.currentPage }
+    }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
-        modifier = modifier.statusBarsPadding(),
+        modifier = modifier
+            .statusBarsPadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            MMSearchBar(
-                query = searchText,
-                modifier = Modifier,
-                onQueryChange = {
-                    accountingViewModel.onSearchTextChanged(it)
-
-                },
-                onClearClick = { accountingViewModel.onClearClick() }
+            MMTopAppBar(
+                titleText = "Accounting",
+                scrollBehavior = scrollBehavior
             )
-
-        },
-        bottomBar = {
-            AccountingBottomNavigation(
-                items = accountingBottomNavigation,
-                accountingNavController = accountingNavController
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = modifier.size(45.dp),
-                onClick = {
-                    if (accountingNavController.currentDestination?.route == Screen.EXPENSESLIST.name) {
-                        appNavController.navigate(Screen.ADDEXPENSE.name)
-                    }
-                    if (accountingNavController.currentDestination?.route == Screen.INVESTMENTSLIST.name) {
-                        appNavController.navigate(Screen.ADDINVESTMENT.name)
-                    }
-                    if (accountingNavController.currentDestination?.route == Screen.LBSCREEN.name) {
-                        appNavController.navigate(Screen.ADDBORROWER.name)
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.tertiary
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Add", Modifier.size(25.dp))
-            }
         }
 
     ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+
+    ) {
+        SecondaryScrollableTabRow(
+            modifier = modifier.padding(4.dp),
+            containerColor = MaterialTheme.colorScheme.background,
+            edgePadding = 8.dp,
+            divider =  {},
+            indicator = { },
+            selectedTabIndex = selectedTabIndex.value
         ) {
-            AccountingNavHost(Modifier, accountingNavController, searchText)
+            accountingViewModel.accountingScreenList.forEachIndexed { index, accountingType ->
+                Tab(
+                    modifier = modifier
+                        .requiredHeight(40.dp)
+                        .padding(horizontal = 6.dp)
+                        .border(
+                            1.dp,
+                            if (selectedTabIndex.value == index) {
+                                MaterialTheme.colorScheme.secondary
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                            RoundedCornerShape(50)
+                        )
+                        .clip(RoundedCornerShape(50)),
+                    selected = selectedTabIndex.value == index,
+                    selectedContentColor = MaterialTheme.colorScheme.secondary,
+                    unselectedContentColor = MaterialTheme.colorScheme.outline,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(accountingViewModel.accountingScreenList.indexOf(accountingType))
+                        }
+                    },
+                    text = { Text(text = accountingType.getName()) }
+                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+        ) {
+
+            when (it) {
+                0 -> ExpenseListScreen( modifier = modifier, navController = navController,
+                     expenseModel = expenseModel)
+                1 -> InvestmentListScreen(investmentModel = investmentModel, modifier =  modifier, navController = navController)
+                2 -> IncomeListScreen(navController = navController, incomeModel = incomeModel)
+                3 -> InsuranceListScreen(navController = navController, insuranceModel = insuranceModel)
+                4 -> {}
+                5 -> BorrowerListScreen(navController = navController, borrowerModel = borrowerModel)
+                6 -> LenderListScreen(navController = navController, lenderModel = lenderModel)
+                else -> {}
+            }
 
         }
     }
-
+}
 }

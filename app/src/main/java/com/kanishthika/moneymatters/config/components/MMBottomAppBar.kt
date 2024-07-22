@@ -1,22 +1,53 @@
 package com.kanishthika.moneymatters.config.components
 
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
-import com.kanishthika.moneymatters.R
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.kanishthika.moneymatters.config.utils.clickableOnce
 
 @Composable
-fun MMBottomAppBar(
-    content: @Composable() (RowScope.() -> Unit)
-){
+fun MMBottomAppBarButton(
+    bottomBarText: String,
+    enabled: Boolean,
+    modifier: Modifier,
+    onBottomBarClick: () -> Unit
+) {
     BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = Modifier.padding(dimensionResource(id = R.dimen.uni_screen_padding))
+        containerColor = if (enabled)
+            MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.tertiaryContainer.copy(
+            0.5f
+        ),
+        modifier = modifier
+            .height(50.dp)
+            .fillMaxWidth()
+            .clickableOnce(
+                enabled = enabled
+            ) {
+                onBottomBarClick()
+            }
     ) {
-        content()
+        Column(
+            modifier = modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = bottomBarText,
+                color = if (enabled)
+                    MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                    0.5f
+                ),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
+    }
 }
