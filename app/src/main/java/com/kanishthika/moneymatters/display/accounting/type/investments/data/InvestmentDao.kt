@@ -25,4 +25,7 @@ interface InvestmentDao {
     @Delete
     suspend fun deleteInvestment (investment: Investment)
 
+    @Query("SELECT * FROM investments_list WHERE name = :name  LIMIT 1")
+    suspend fun getItemByName(name: String): Investment?
+
 }

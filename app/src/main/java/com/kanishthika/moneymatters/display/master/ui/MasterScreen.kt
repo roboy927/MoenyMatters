@@ -1,5 +1,7 @@
 package com.kanishthika.moneymatters.display.master.ui
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.MMTopAppBar
+import com.kanishthika.moneymatters.config.mmComposable.MMTopAppBar
 import com.kanishthika.moneymatters.config.utils.clickableOnce
 import com.kanishthika.moneymatters.display.master.data.masterMenuItemList
 
@@ -36,6 +38,12 @@ fun MasterScreen(
     navController: NavController
 ) {
     val menuItemList = masterMenuItemList()
+
+    Log.d("TAG", "MasterScreen: Started ")
+
+    BackHandler {
+        navController.navigateUp()
+    }
 
     Scaffold(
         modifier = modifier,

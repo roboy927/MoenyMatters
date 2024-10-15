@@ -1,6 +1,8 @@
 package com.kanishthika.moneymatters.display.transaction.ui.displayTransaction
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.kanishthika.moneymatters.R
 import com.kanishthika.moneymatters.display.transaction.data.TransactionType
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionDetail(
     modifier: Modifier,
@@ -38,13 +44,21 @@ fun TransactionDetail(
     account: String,
     transactionType: TransactionType,
     icon: ImageVector,
-    iconBackground: Color
+    iconBackground: Color,
+    hasReminder: Boolean,
+    hasLabel: Boolean,
+    navigateToEdit: () -> Unit,
+    deleteTxn: () -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = modifier
+                .combinedClickable(
+                    onClick = { navigateToEdit() },
+                    onLongClick = {deleteTxn()}
+                )
                 .padding(8.dp, 10.dp)
                 .fillMaxWidth()
         ) {
@@ -60,7 +74,9 @@ fun TransactionDetail(
                     Icon(
                         imageVector = icon,
                         contentDescription = "to be changed",
-                        modifier = modifier.padding(6.dp).size(20.dp),
+                        modifier = modifier
+                            .padding(6.dp)
+                            .size(20.dp),
                     )
                 }
                 Spacer(modifier = modifier.width(10.dp))
@@ -88,13 +104,39 @@ fun TransactionDetail(
                         )
                     }
                     Spacer(modifier = modifier.width(6.dp))
-                    Text(
-                        text = stringResource(id = R.string.rupee_symbol) + " $amount",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        fontWeight = FontWeight.Light
-
-                    )
+                    Column (
+                        horizontalAlignment = Alignment.End
+                    ){
+                        Text(
+                            text = stringResource(id = R.string.rupee_symbol) + " $amount",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            fontWeight = FontWeight.Light
+                        )
+                        Spacer(modifier = modifier.height(4.dp))
+                        Row (
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ){
+                            if (hasReminder){
+                                Icon(
+                                    modifier = modifier.size(17.dp),
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(0.5f)
+                                )
+                            }
+                            if (hasLabel){
+                                Spacer(modifier = modifier.width(4.dp))
+                                Icon(
+                                    modifier = modifier.size(17.dp),
+                                    imageVector = Icons.Default.ShoppingCart,
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer.copy(0.5f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
             Spacer(modifier = modifier.height(6.dp))

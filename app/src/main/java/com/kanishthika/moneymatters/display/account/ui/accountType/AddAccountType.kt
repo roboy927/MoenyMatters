@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.MMOutlinedTextField
+import com.kanishthika.moneymatters.config.mmComposable.MMOutlinedTextField
 import com.kanishthika.moneymatters.config.utils.clickableOnce
 
 @Composable

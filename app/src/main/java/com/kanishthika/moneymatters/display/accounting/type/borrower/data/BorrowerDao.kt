@@ -28,4 +28,7 @@ interface BorrowerDao {
 
     @Query("SELECT * FROM borrowers_list WHERE borrowerName LIKE '%' || :query || '%'")
     fun searchBorrowers(query: String): Flow<List<Borrower>>
+
+    @Query("SELECT * FROM borrowers_list WHERE borrowerName = :itemName LIMIT 1")
+    suspend fun getItemByName(itemName: String): Borrower?
 }

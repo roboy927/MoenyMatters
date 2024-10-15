@@ -14,6 +14,10 @@ class InvestmentRepository @Inject constructor(private val investmentDao: Invest
         return investmentDao.getAllInvestments()
     }
 
+    override suspend fun getItemByName(name: String): Investment {
+        return investmentDao.getItemByName(name) ?: Investment(1,"",0.0, "")
+    }
+
     override suspend fun deleteItem(item: Investment) {
        investmentDao.deleteInvestment(item)
     }

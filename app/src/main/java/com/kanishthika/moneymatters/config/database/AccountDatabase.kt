@@ -20,6 +20,12 @@ import com.kanishthika.moneymatters.display.accounting.type.investments.data.Inv
 import com.kanishthika.moneymatters.display.accounting.type.investments.data.InvestmentDao
 import com.kanishthika.moneymatters.display.accounting.type.lenders.data.Lender
 import com.kanishthika.moneymatters.display.accounting.type.lenders.data.LenderDao
+import com.kanishthika.moneymatters.display.label.data.Label
+import com.kanishthika.moneymatters.display.label.data.LabelDao
+import com.kanishthika.moneymatters.display.label.data.labelType.LabelType
+import com.kanishthika.moneymatters.display.label.data.labelType.LabelTypeDao
+import com.kanishthika.moneymatters.display.reminder.data.MMReminder
+import com.kanishthika.moneymatters.display.reminder.data.MMReminderDao
 import com.kanishthika.moneymatters.display.transaction.data.Transaction
 import com.kanishthika.moneymatters.display.transaction.data.TransactionDao
 
@@ -36,6 +42,9 @@ import com.kanishthika.moneymatters.display.transaction.data.TransactionDao
         Income::class,
         Insurance::class,
         InsuranceType::class,
+        LabelType::class,
+        Label::class,
+        MMReminder::class
     ], version = 1, exportSchema = false
 )
 abstract class AccountDatabase : RoomDatabase() {
@@ -50,5 +59,8 @@ abstract class AccountDatabase : RoomDatabase() {
     abstract fun insuranceDao(): InsuranceDao
     abstract fun insuranceTypeDao(): InsuranceTypeDao
     abstract fun accountTypeDao(): AccountTypeDao
+    abstract fun mmReminderDao(): MMReminderDao
+    abstract fun labelDao(): LabelDao
+    abstract fun labelTypeDao(): LabelTypeDao
 
 }

@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.HorizontalLineWithCenteredText
+import com.kanishthika.moneymatters.config.mmComposable.HorizontalLineWithCenteredText
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.display.accounting.type.lenders.data.Lender
 import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.AddOrUpdateItemScreen
@@ -97,7 +97,22 @@ fun AddLenderScreen(
         navController = navController,
         screenTitle = "Add Lender",
         buttonText = if (lender == null) "Add" else "Update",
-        isEnabled = lenderModel.isAnyFieldIsEmpty(lenderUiState).not()
+        isEnabled = lenderModel.isAnyFieldIsEmpty(lenderUiState).not(),
+        onBottomBarClick = {
+            if (lender != null) {
+                lenderModel.updateItem(lender.copy(
+                    lenderName = lenderUiState.name,
+                    lenderContactNumber = lenderUiState.description,
+                    amount = lenderUiState.amount.toDouble()
+                )) {
+                    navController.popBackStack()
+                }
+            } else {
+                lenderModel.addItemToDB {
+                    navController.popBackStack()
+                }
+            }
+        }
     ) {
         MMOutlinedTextFieldWithState(
             enabled = lenderEditEnabled,

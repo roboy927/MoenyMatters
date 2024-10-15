@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.kanishthika.moneymatters.R
-import com.kanishthika.moneymatters.config.components.MMActionBarItem
+import com.kanishthika.moneymatters.config.mmComposable.MMActionBarItem
 import com.kanishthika.moneymatters.config.utils.clickableOnce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-
+package com.kanishthika.moneymatters.display.transaction.ui.displayTransaction
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -25,13 +25,14 @@ import com.kanishthika.moneymatters.display.accounting.data.toAccountingType
 import com.kanishthika.moneymatters.display.transaction.data.Transaction
 import com.kanishthika.moneymatters.display.transaction.data.TransactionType
 import com.kanishthika.moneymatters.display.transaction.data.stringToTransactionType
-import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.TransactionDetail
 
 @Composable
 fun TransactionListScreen(
     modifier: Modifier,
     displayTransactions: List<Transaction>,
-    emptyDataText: String
+    emptyDataText: String,
+    navigateToEdit: (Transaction) -> Unit,
+    deleteTxn: (Transaction) -> Unit
 ) {
     if (displayTransactions.isEmpty()) {
         Box(
@@ -71,7 +72,11 @@ fun TransactionListScreen(
                     iconBackground = when (stringToTransactionType(transaction.type) ) {
                         TransactionType.CREDIT -> MaterialTheme.colorScheme.primary.copy(0.8f)
                         TransactionType.DEBIT -> MaterialTheme.colorScheme.secondary.copy(0.8f)
-                    }
+                    },
+                    navigateToEdit = {navigateToEdit(transaction)},
+                    hasReminder = transaction.reminderId != null,
+                    hasLabel = transaction.label != null,
+                    deleteTxn = {deleteTxn(transaction)}
                 )
                 if (displayTransactions.lastIndex != displayTransactions.indexOf(transaction)) {
                     Spacer(

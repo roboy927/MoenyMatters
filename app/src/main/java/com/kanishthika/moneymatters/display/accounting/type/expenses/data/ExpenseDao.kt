@@ -25,4 +25,7 @@ interface ExpenseDao {
     @Delete
     suspend fun deleteExpense (expense: Expense)
 
+    @Query("SELECT * FROM expenses_list WHERE name = :itemName LIMIT 1")
+    suspend fun getItemByName(itemName: String): Expense?
+
 }

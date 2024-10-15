@@ -47,7 +47,22 @@ fun AddExpenseScreen(
         navController = navController,
         screenTitle = "Add Expense",
         buttonText = if (expense == null) "Add" else "Update",
-        isEnabled = expenseModel.isAnyFieldIsEmpty(expenseUiState).not()
+        isEnabled = expenseModel.isAnyFieldIsEmpty(expenseUiState).not(),
+        onBottomBarClick = {
+            if (expense != null) {
+                expenseModel.updateItem(expense.copy(
+                    name = expenseUiState.name,
+                    description = expenseUiState.description,
+                    amount = expenseUiState.amount.toDouble()
+                )) {
+                    navController.popBackStack()
+                }
+            } else {
+                expenseModel.addItemToDB {
+                    navController.popBackStack()
+                }
+            }
+        }
     ) {
         MMOutlinedTextFieldWithState(
             enabled = expenseEditEnabled,

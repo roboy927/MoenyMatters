@@ -24,10 +24,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.MMColumnScaffoldContentColumn
-import com.kanishthika.moneymatters.config.components.MMDropDownMenu
-import com.kanishthika.moneymatters.config.components.MMOutlinedTextField
-import com.kanishthika.moneymatters.config.components.MMTopAppBar
+import com.kanishthika.moneymatters.config.mmComposable.MMColumnScaffoldContentColumn
+import com.kanishthika.moneymatters.config.mmComposable.MMDropDownMenu
+import com.kanishthika.moneymatters.config.mmComposable.MMOutlinedTextField
+import com.kanishthika.moneymatters.config.mmComposable.MMTopAppBar
 import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.utils.clickableOnce
 

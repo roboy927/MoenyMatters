@@ -32,8 +32,33 @@ class AccountingRepository @Inject constructor(
     val getAllLenders = lenderRepository.getAllItems()
     val getAllIncomes = incomeRepository.getAllItems()
     val getAllInsurances = insuranceRepository.getAllItems()
- //   val getAllOthers = otherRepository.getAllOthers
+ //   val getAllOthers = otherRepository.getAllOthers TODO()
   //  val getAllLoans = loanRepository.getAllLoans
+
+    suspend fun getBorrowerByName(name: String): Borrower {
+        return borrowerRepository.getItemByName(name)
+    }
+
+    suspend fun getExpenseByName(name: String): Expense {
+        return expenseRepository.getItemByName(name)
+    }
+
+    suspend fun getInvestmentByName(name: String): Investment {
+        return investmentRepository.getItemByName(name)
+    }
+
+    suspend fun getIncomeByName(name: String): Income {
+        return incomeRepository.getItemByName(name)
+    }
+
+    suspend fun getInsuranceByName(name: String): Insurance {
+        return insuranceRepository.getItemByName(name)
+    }
+
+    suspend fun getLenderByName(name: String): Lender {
+        return lenderRepository.getItemByName(name)
+    }
+
 
     suspend fun updateExpense(expense: Expense){
         expenseRepository.updateItem(expense)

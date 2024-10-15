@@ -22,4 +22,7 @@ interface InsuranceDao {
         @Delete
         suspend fun deleteInsurance (insurance: Insurance)
 
+        @Query("SELECT * FROM insurance_list WHERE providerName = :providerName AND policyNumber = :policyNumber LIMIT 1")
+        suspend fun getInsuranceByName(providerName: String, policyNumber: Int): Insurance?
+
 }

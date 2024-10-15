@@ -330,6 +330,12 @@ class DisplayTransactionModel @Inject constructor(
             )
         }
     }
+
+    fun deleteTransaction(transaction: Transaction){
+        viewModelScope.launch {
+            transactionRepository.deleteTransaction(transaction)
+        }
+    }
 }
 
 

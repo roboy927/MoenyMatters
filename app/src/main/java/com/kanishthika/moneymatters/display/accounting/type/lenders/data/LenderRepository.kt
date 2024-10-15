@@ -14,6 +14,10 @@ class LenderRepository @Inject constructor(private val lenderDao: LenderDao) :
         return lenderDao.getAllLenders()
     }
 
+    override suspend fun getItemByName(name: String): Lender {
+        return lenderDao.getItemByName(name) ?: Lender(1,"","", 0.0)
+    }
+
     override suspend fun deleteItem(item: Lender) {
         lenderDao.deleteLender(item)
     }

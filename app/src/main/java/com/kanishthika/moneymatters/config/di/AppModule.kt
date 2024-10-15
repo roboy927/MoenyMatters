@@ -12,6 +12,9 @@ import com.kanishthika.moneymatters.display.accounting.type.insurance.data.Insur
 import com.kanishthika.moneymatters.display.accounting.type.insurance.data.insuranceType.InsuranceTypeDao
 import com.kanishthika.moneymatters.display.accounting.type.investments.data.InvestmentDao
 import com.kanishthika.moneymatters.display.accounting.type.lenders.data.LenderDao
+import com.kanishthika.moneymatters.display.label.data.LabelDao
+import com.kanishthika.moneymatters.display.label.data.labelType.LabelTypeDao
+import com.kanishthika.moneymatters.display.reminder.data.MMReminderDao
 import com.kanishthika.moneymatters.display.transaction.data.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -60,6 +63,15 @@ class AppModule{
 
     @Provides
     fun provideAccountTypeDao(accountDatabase: AccountDatabase): AccountTypeDao = accountDatabase.accountTypeDao()
+
+    @Provides
+    fun provideMMReminderDao(accountDatabase: AccountDatabase): MMReminderDao = accountDatabase.mmReminderDao()
+
+    @Provides
+    fun provideLabelDao(accountDatabase: AccountDatabase): LabelDao = accountDatabase.labelDao()
+
+    @Provides
+    fun provideLabelTypeDao(accountDatabase: AccountDatabase): LabelTypeDao = accountDatabase.labelTypeDao()
 
 
 }

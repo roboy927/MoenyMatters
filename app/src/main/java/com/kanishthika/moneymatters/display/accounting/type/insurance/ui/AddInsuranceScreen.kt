@@ -21,8 +21,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.MMDatePickerInput
-import com.kanishthika.moneymatters.config.components.MMDropDownMenu
+import com.kanishthika.moneymatters.config.mmComposable.MMDatePickerInput
+import com.kanishthika.moneymatters.config.mmComposable.MMDropDownMenu
 import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.config.utils.clickableOnce
@@ -64,7 +64,12 @@ fun AddInsuranceScreen(
         navController = navController,
         screenTitle = "Add Insurance",
         buttonText = if (insurance == null) "Add" else "Update",
-        isEnabled = insuranceModel.isAnyFieldEmpty(insuranceUiState).not()
+        isEnabled = insuranceModel.isAnyFieldEmpty(insuranceUiState).not(),
+        onBottomBarClick = {
+            insuranceModel.addItemToDB {
+                navController.navigateUp()
+            }
+        }
     ) {
         MMDropDownMenu(
             list = insuranceTypeList,

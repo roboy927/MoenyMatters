@@ -130,7 +130,9 @@ abstract class BaseFinancialModel<T>(
     }
 
     fun updateAmount(amount: String) {
-        _uiState.update { it.copy(amount = amount) }
+        _uiState.update { it.copy(
+            amount = amount.ifEmpty { "0" }
+        ) }
     }
 
     fun updateDescription(description: String) {

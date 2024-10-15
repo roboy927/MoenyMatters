@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kanishthika.moneymatters.display.account.data.AccountRepository
 import com.kanishthika.moneymatters.display.accounting.data.AccountingType
+import com.kanishthika.moneymatters.display.accounting.data.AmountViewType
 import com.kanishthika.moneymatters.display.accounting.data.getName
 import com.kanishthika.moneymatters.display.transaction.data.Transaction
 import com.kanishthika.moneymatters.display.transaction.data.TransactionRepository
@@ -28,8 +29,10 @@ class DashBoardModel @Inject constructor(
     private val _lastSevenTransaction = MutableStateFlow<List<Transaction>>(emptyList())
     val lastSevenTransaction = _lastSevenTransaction.asStateFlow()
 
-    private fun getAmounts(monthYear: String) {
-        viewModelScope.launch {
+    val monthYearList = transactionRepository.getDistinctMonthYearStrings()
+    val yearList = transactionRepository.getDistinctYearStrings()
+
+    private suspend fun getAmounts(monthYear: String) {
             val incomeAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.INCOME.getName())
             val expenseAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.EXPENSE.getName())
             val investmentAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.INVESTMENT.getName())
@@ -54,17 +57,48 @@ class DashBoardModel @Inject constructor(
             Log.d("TAG", "loanEmi: ${dashBoardUiState.value.loanEmiAmount} ")
             Log.d("TAG", "insurance: ${dashBoardUiState.value.insuranceAmount} ")
             Log.d("TAG", "other: ${dashBoardUiState.value.otherAmount} ")
-        }
     }
 
-
-    init {
+    fun loadData() {
+        Log.d("TAG", "loadData: loading")
+        viewModelScope.launch {
+            accountRepository.getAllAccount.collectLatest { accounts ->
+                _dashBoardUiState.update {
+                    it.copy(
+                        accountList = accounts
+                    )
+                }
+            }
+        }
         viewModelScope.launch {
             transactionRepository.getRecentTransaction().collectLatest {
                 _lastSevenTransaction.value = it
             }
         }
-        getAmounts(dashBoardUiState.value.monthYear)
+        viewModelScope.launch {
+            getAmounts(dashBoardUiState.value.monthYear)
+        }
+    }
 
+    fun changeBackPressedOnce(boolean: Boolean){
+        _dashBoardUiState.update {
+            it.copy(
+                backPressedOnce = boolean
+            )
+        }
+    }
+
+    suspend fun getAccountBalance(accountName: String): Double{
+        val initialBalance = accountRepository.getAccountByName(accountName).balance
+        val txnBalance = transactionRepository.getAccountBalance(accountName)
+        return initialBalance + txnBalance
+    }
+
+    fun changeAmountViewType(amountViewType: AmountViewType){
+        _dashBoardUiState.update{
+            it.copy(
+                amountViewType = amountViewType
+            )
+        }
     }
 }

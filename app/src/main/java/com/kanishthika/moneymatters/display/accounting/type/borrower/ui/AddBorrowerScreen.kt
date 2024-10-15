@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.HorizontalLineWithCenteredText
+import com.kanishthika.moneymatters.config.mmComposable.HorizontalLineWithCenteredText
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.display.accounting.type.borrower.data.Borrower
 import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.AddOrUpdateItemScreen
@@ -96,7 +96,22 @@ fun AddBorrowerScreen(
         navController = navController,
         screenTitle = "Add Borrower",
         buttonText = if (borrower == null) "Add" else "Update",
-        isEnabled = borrowerModel.isAnyFieldIsEmpty(borrowerUiState).not()
+        isEnabled = borrowerModel.isAnyFieldIsEmpty(borrowerUiState).not(),
+        onBottomBarClick = {
+            if (borrower != null) {
+                borrowerModel.updateItem(borrower.copy(
+                    borrowerName = borrowerUiState.name,
+                    borrowerContactNumber = borrowerUiState.description,
+                    amount = borrowerUiState.amount.toDouble()
+                )) {
+                    navController.popBackStack()
+                }
+            } else {
+                borrowerModel.addItemToDB {
+                    navController.popBackStack()
+                }
+            }
+        }
     ) {
         MMOutlinedTextFieldWithState(
             enabled = borrowerEditEnabled,
@@ -132,6 +147,7 @@ fun AddBorrowerScreen(
                             // Some works that require permission
                             contactLauncher.launch(null)
                         }
+
                         else -> {
                             // Asking for permission
                             permissionLauncher.launch(Manifest.permission.READ_CONTACTS)
@@ -156,7 +172,7 @@ fun AddBorrowerScreen(
             )
         )
         if (!borrowerEditEnabled) {
-           InformationText(modifier = modifier)
+            InformationText(modifier = modifier)
         }
     }
 

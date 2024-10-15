@@ -15,4 +15,8 @@ class AccountRepository @Inject constructor(private val accountDao: AccountDao) 
     suspend fun deleteAccount(account: Account){
         accountDao.deleteAccount(account)
     }
+
+    suspend fun getAccountByName(name: String): Account {
+        return accountDao.getAccountByName(name) ?: Account(0,"","",0.0)
+    }
 }

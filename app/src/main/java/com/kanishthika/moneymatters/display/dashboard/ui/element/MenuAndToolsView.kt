@@ -19,20 +19,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.kanishthika.moneymatters.display.dashboard.data.MenuItem
 
 @Composable
 fun Menu(
     menuItems: List<MenuItem>,
-    navController: NavController,
+    navigateTo:(String)-> Unit,
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ){
         itemsIndexed(menuItems) { _, menuItem ->
             MenuItemView(menuItem = menuItem) {
-                navController.navigate(menuItem.route)
+                navigateTo(menuItem.route)
             }
         }
     }

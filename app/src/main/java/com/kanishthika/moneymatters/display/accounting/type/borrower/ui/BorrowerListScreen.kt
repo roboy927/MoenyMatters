@@ -1,41 +1,25 @@
 package com.kanishthika.moneymatters.display.accounting.type.borrower.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.gson.Gson
+import com.kanishthika.moneymatters.config.mmComposable.MMEmptyStateScreen
+import com.kanishthika.moneymatters.config.mmComposable.MMLoadingScreen
 import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
-import com.kanishthika.moneymatters.display.accounting.type.borrower.data.Borrower
-import com.kanishthika.moneymatters.display.accounting.type.borrower.ui.BorrowerModel
 import com.kanishthika.moneymatters.display.accounting.ui.element.ConfirmDeleteDialog
-import com.kanishthika.moneymatters.display.accounting.ui.element.EmptyStateScreen
 import com.kanishthika.moneymatters.display.accounting.ui.element.HeaderRow
 import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.FinancialItemList
 
@@ -70,11 +54,7 @@ fun BorrowerListScreen(
     val yearName = financialUiState.yearText
 
     if (isLoading) {
-        Box(
-            modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        MMLoadingScreen(modifier = modifier)
     } else {
         Column(
             modifier = modifier
@@ -103,7 +83,7 @@ fun BorrowerListScreen(
             )
 
             if (items.isEmpty()) {
-                EmptyStateScreen(modifier)
+                MMEmptyStateScreen(modifier)
             } else {
                 FinancialItemList(
                     allItems = items,

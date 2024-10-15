@@ -2,7 +2,7 @@ package com.kanishthika.moneymatters.display.accounting.ui.element
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.kanishthika.moneymatters.config.components.MMSimpleLAlertDialog
+import com.kanishthika.moneymatters.config.mmComposable.MMSimpleLAlertDialog
 
 @Composable
 fun ConfirmDeleteDialog(

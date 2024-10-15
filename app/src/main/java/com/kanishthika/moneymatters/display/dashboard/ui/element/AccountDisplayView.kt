@@ -23,8 +23,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import com.kanishthika.moneymatters.R
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.display.account.data.Account
-import com.kanishthika.moneymatters.display.account.ui.AccountViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -42,24 +41,29 @@ import kotlinx.coroutines.launch
 @Composable
 fun AccountsDisplayCards(
     modifier: Modifier,
-    accountViewModel: AccountViewModel,
+    accounts: List<Account>,
+    deleteAccount: (Account) -> Unit,
     scope: CoroutineScope,
     snackBarHostState: SnackbarHostState,
     addAccountScreen: () -> Unit,
+    getBalance:suspend (Account) -> String
 ) {
-
-    val accounts by accountViewModel.getAllAccounts.collectAsState(emptyList())
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(accounts)
         { account ->
+            val balance by produceState(initialValue = "--", key1 = account) {
+                value = getBalance(account)
+            }
+
             AccountCard(
                 scope = scope,
                 snackBarHostState = snackBarHostState,
-                account = account,
-                deleteAccount = { accountViewModel.deleteAccount(account) },
+                accountName = account.name,
+                accountBalance = balance ,
+                deleteAccount = { deleteAccount(account) },
                 modifier = modifier,
                 icon = when (account.type) {
                     "Bank" -> ImageVector.vectorResource(id = R.drawable.bankaccount)
@@ -113,8 +117,9 @@ fun AccountsDisplayCards(
 fun AccountCard(
     scope: CoroutineScope,
     snackBarHostState: SnackbarHostState,
-    account: Account,
-    deleteAccount: (Account) -> Unit,
+    accountName: String,
+    accountBalance: String,
+    deleteAccount: () -> Unit,
     modifier: Modifier,
     icon: ImageVector
 
@@ -127,7 +132,7 @@ fun AccountCard(
                 onLongClick = {
                     scope.launch {
                         val snackBarResult = snackBarHostState.showSnackbar(
-                            message = "Delete ${account.name} ?",
+                            message = "Delete ${accountName} ?",
                             actionLabel = "YES",
                             withDismissAction = true,
                             duration = SnackbarDuration.Long
@@ -135,7 +140,7 @@ fun AccountCard(
                         when (snackBarResult) {
                             SnackbarResult.Dismissed -> {}
                             SnackbarResult.ActionPerformed ->
-                                deleteAccount(account)
+                                deleteAccount()
 
                         }
                     }
@@ -159,13 +164,13 @@ fun AccountCard(
             )
             Spacer(modifier = modifier.height(8.dp))
             Text(
-                text = capitalizeWords(account.name),
+                text = capitalizeWords(accountName),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = modifier.height(2.dp))
             Text(
-                text = "Balance: " + stringResource(id = R.string.rupee_symbol) + " " + account.balance,
+                text = "Balance: ${stringResource(id = R.string.rupee_symbol)} $accountBalance",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )

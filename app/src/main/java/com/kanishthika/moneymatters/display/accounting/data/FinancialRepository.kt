@@ -8,6 +8,7 @@ interface FinancialRepository<T : FinancialItem> {
     suspend fun insertItem(item: T): Long
     suspend fun updateItem(item: T): Int
     suspend fun deleteItem(item: T)
+    suspend fun getItemByName(name: String): T
     // Add more methods as needed
 }
 

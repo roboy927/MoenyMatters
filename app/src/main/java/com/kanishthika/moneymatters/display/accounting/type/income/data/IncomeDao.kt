@@ -25,4 +25,7 @@ interface IncomeDao {
     @Delete
     suspend fun deleteIncome (income: Income)
 
+    @Query("SELECT * FROM income_list WHERE name = :itemName LIMIT 1")
+    suspend fun getItemByName(itemName: String): Income?
+
 }

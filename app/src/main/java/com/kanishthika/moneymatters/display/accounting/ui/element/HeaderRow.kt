@@ -1,5 +1,6 @@
 package com.kanishthika.moneymatters.display.accounting.ui.element
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kanishthika.moneymatters.R
-import com.kanishthika.moneymatters.config.components.MMActionBarItem
+import com.kanishthika.moneymatters.config.mmComposable.MMActionBarItem
 import com.kanishthika.moneymatters.display.accounting.data.AmountViewType
 
 @Composable
@@ -71,7 +72,7 @@ fun HeaderRow(
                 color = MaterialTheme.colorScheme.secondary
             )
             DropdownMenu(
-                modifier = modifier.heightIn(max = 300.dp),
+                modifier = modifier.heightIn(max = 300.dp).background(MaterialTheme.colorScheme.inverseSurface),
                 expanded = showSortDropdownMenu,
                 onDismissRequest = { onSortDropdownMenuChange(false) }
             ) {
@@ -100,7 +101,7 @@ fun HeaderRow(
                         color = MaterialTheme.colorScheme.secondary
                     )
                     DropdownMenu(
-                        modifier = modifier.heightIn(max = 300.dp),
+                        modifier = modifier.heightIn(max = 300.dp).background(MaterialTheme.colorScheme.inverseSurface),
                         expanded = showMonthDropdownMenu,
                         onDismissRequest = { onMonthDropdownMenuChange(false) }
                     ) {
@@ -130,6 +131,7 @@ fun HeaderRow(
                         color = MaterialTheme.colorScheme.secondary
                     )
                     DropdownMenu(
+                        modifier = modifier.heightIn(max = 300.dp).background(MaterialTheme.colorScheme.inverseSurface),
                         expanded = showYearDropdownMenu,
                         onDismissRequest = { onYearDropdownMenuChange(false) }
                     ) {

@@ -20,25 +20,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.kanishthika.moneymatters.config.components.MMColumnScaffoldContentColumn
-import com.kanishthika.moneymatters.config.components.MMOutlinedTextField
-import com.kanishthika.moneymatters.config.components.MMTopAppBar
+import com.kanishthika.moneymatters.config.mmComposable.MMColumnScaffoldContentColumn
+import com.kanishthika.moneymatters.config.mmComposable.MMOutlinedTextField
+import com.kanishthika.moneymatters.config.mmComposable.MMTopAppBar
 import com.kanishthika.moneymatters.config.utils.clickableOnce
 import com.kanishthika.moneymatters.display.accounting.data.FinancialItem
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun <T: FinancialItem> AddOrUpdateItemScreen(
+fun <T : FinancialItem> AddOrUpdateItemScreen(
     viewModel: BaseFinancialModel<T>,
     modifier: Modifier = Modifier,
     navController: NavController,
     screenTitle: String,
     buttonText: String,
     isEnabled: Boolean,
+    onBottomBarClick: () -> Unit = {},
     content: @Composable (() -> Unit),
 
-) {
+    ) {
     val focusManager = LocalFocusManager.current
 
     Scaffold(
@@ -48,10 +49,8 @@ fun <T: FinancialItem> AddOrUpdateItemScreen(
             FinancialBottomBar(
                 buttonText = buttonText,
                 onClick = {
-                    viewModel.addItemToDB {
-                        navController.popBackStack()
-                        focusManager.clearFocus()
-                    }
+                    onBottomBarClick()
+                    focusManager.clearFocus()
                 },
                 isEnabled = isEnabled
             )
@@ -99,7 +98,9 @@ fun FinancialBottomBar(
 ) {
     BottomAppBar(
         containerColor = if (isEnabled)
-            MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.tertiaryContainer.copy(0.5f),
+            MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.tertiaryContainer.copy(
+            0.5f
+        ),
         modifier = modifier
             .height(50.dp)
             .fillMaxWidth()
@@ -114,7 +115,9 @@ fun FinancialBottomBar(
             Text(
                 text = buttonText,
                 color = if (isEnabled)
-                    MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onTertiaryContainer.copy(0.5f),
+                    MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                    0.5f
+                ),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -123,7 +126,7 @@ fun FinancialBottomBar(
 }
 
 @Composable
-fun InformationText(modifier: Modifier){
+fun InformationText(modifier: Modifier) {
     Box(
         modifier = modifier.padding(8.dp)
     ) {

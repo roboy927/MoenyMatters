@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.kanishthika.moneymatters.display.account.data.Account
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -26,4 +25,7 @@ interface AccountDao {
     // Delete an account from the database
     @Delete
     suspend fun deleteAccount (account: Account)
+
+    @Query("SELECT * FROM accounts_List WHERE name = :accountName LIMIT 1")
+    suspend fun getAccountByName(accountName: String): Account?
 }

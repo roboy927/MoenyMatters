@@ -23,6 +23,14 @@ class TransactionRepository @Inject constructor(
        return transactionDao.addTransaction(transaction)
     }
 
+    suspend fun updateTransaction(transaction: Transaction) {
+        transactionDao.updateTransaction(transaction)
+    }
+
+    suspend fun deleteTransaction(transaction: Transaction){
+        transactionDao.deleteTransaction(transaction)
+    }
+
     suspend fun searchTransactionsByDescription(description: String): List<Transaction> {
         val searchQuery = "%$description%"
         return transactionDao.searchTransactionsByDescription(searchQuery)
@@ -41,6 +49,10 @@ class TransactionRepository @Inject constructor(
 
     suspend fun getAmountOfAccountingType(monthYear: String, accountingType: String): Double {
         return transactionDao.getAmountOfAccountingType(monthYear, accountingType) ?: 0.0
+    }
+
+    suspend fun getAccountBalance(account: String): Double {
+        return transactionDao.getAccountBalance(account) ?: 0.0
     }
 
     fun getDistinctMonthYearStrings(): Flow<List<String>> {
@@ -63,6 +75,22 @@ class TransactionRepository @Inject constructor(
                 transactionDate.format(yearFormatter)
             }.distinct()
         }
+    }
+
+    suspend fun getDebitTotalForLabel(label: String) : Double {
+        return transactionDao.getDebitTotalForLabel(label) ?: 0.0
+    }
+
+    suspend fun getCreditTotalForLabel(label: String) : Double {
+        return transactionDao.getCreditTotalForLabel(label) ?: 0.0
+    }
+
+    fun getRecentLabelTransaction(label: String) : Flow<List<Transaction>> {
+        return transactionDao.getRecentLabelTransaction(label)
+    }
+
+    suspend fun getTxnByReminderId(reminderId: Int): Transaction?{
+        return transactionDao.getTxnByReminderID(reminderId)
     }
 
 }

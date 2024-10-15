@@ -21,9 +21,8 @@ import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
-import com.kanishthika.moneymatters.display.accounting.type.income.ui.IncomeModel
 import com.kanishthika.moneymatters.display.accounting.ui.element.ConfirmDeleteDialog
-import com.kanishthika.moneymatters.display.accounting.ui.element.EmptyStateScreen
+import com.kanishthika.moneymatters.config.mmComposable.MMEmptyStateScreen
 import com.kanishthika.moneymatters.display.accounting.ui.element.HeaderRow
 import com.kanishthika.moneymatters.display.accounting.ui.financialGenerics.FinancialItemList
 
@@ -91,7 +90,7 @@ fun IncomeListScreen(
             )
 
             if (items.isEmpty()) {
-                EmptyStateScreen(modifier)
+                MMEmptyStateScreen(modifier)
             } else {
                 FinancialItemList(
                     allItems = items,

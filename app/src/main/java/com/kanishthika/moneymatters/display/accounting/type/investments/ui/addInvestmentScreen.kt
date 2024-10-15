@@ -51,7 +51,22 @@ fun AddInvestmentScreen(
         navController = navController,
         screenTitle = "Add Investment",
         buttonText = if (investment == null) "Add" else "Update",
-        isEnabled = investmentModel.isAnyFieldIsEmpty(investmentUiState).not()
+        isEnabled = investmentModel.isAnyFieldIsEmpty(investmentUiState).not(),
+        onBottomBarClick = {
+            if (investment != null) {
+                investmentModel.updateItem(investment.copy(
+                    name = investmentUiState.name,
+                    description = investmentUiState.description,
+                    amount = investmentUiState.amount.toDouble()
+                )) {
+                    navController.popBackStack()
+                }
+            } else {
+                investmentModel.addItemToDB {
+                    navController.popBackStack()
+                }
+            }
+        }
     ) {
         MMOutlinedTextFieldWithState(
             enabled = investmentEditEnabled,

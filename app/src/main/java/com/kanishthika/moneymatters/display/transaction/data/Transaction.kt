@@ -13,5 +13,7 @@ data class Transaction(
     val amount: Double,
     val description: String,
     val accountingType: String,
-    val accountingName: String
+    val accountingName: String,
+    val reminderId: Int? = null,
+    val label: String? = null
 )

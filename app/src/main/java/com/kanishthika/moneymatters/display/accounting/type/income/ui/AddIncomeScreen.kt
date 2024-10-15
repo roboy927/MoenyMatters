@@ -47,7 +47,22 @@ fun AddIncomeScreen(
         navController = navController,
         screenTitle = "Add Income",
         buttonText = if (income == null) "Add" else "Update",
-        isEnabled = incomeModel.isAnyFieldIsEmpty(incomeUiState).not()
+        isEnabled = incomeModel.isAnyFieldIsEmpty(incomeUiState).not(),
+        onBottomBarClick = {
+            if (income != null) {
+                incomeModel.updateItem(income.copy(
+                    name = incomeUiState.name,
+                    description = incomeUiState.description,
+                    amount = incomeUiState.amount.toDouble()
+                )) {
+                    navController.popBackStack()
+                }
+            } else {
+                incomeModel.addItemToDB {
+                    navController.popBackStack()
+                }
+            }
+        }
     ) {
         MMOutlinedTextFieldWithState(
             enabled = incomeEditEnabled,

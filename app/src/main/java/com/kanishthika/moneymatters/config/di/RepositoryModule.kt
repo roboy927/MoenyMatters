@@ -25,6 +25,12 @@ import com.kanishthika.moneymatters.display.accounting.type.lenders.data.LenderD
 import com.kanishthika.moneymatters.display.accounting.type.lenders.data.LenderRepository
 import com.kanishthika.moneymatters.display.accounting.type.loan.LoanRepository
 import com.kanishthika.moneymatters.display.accounting.type.other.OtherRepository
+import com.kanishthika.moneymatters.display.label.data.LabelDao
+import com.kanishthika.moneymatters.display.label.data.LabelRepository
+import com.kanishthika.moneymatters.display.label.data.labelType.LabelTypeDao
+import com.kanishthika.moneymatters.display.label.data.labelType.LabelTypeRepository
+import com.kanishthika.moneymatters.display.reminder.data.MMReminderDao
+import com.kanishthika.moneymatters.display.reminder.data.MMReminderRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -96,6 +102,24 @@ object RepositoryModule {
     @Singleton
     fun provideLoanRepository(): LoanRepository {
         return LoanRepository()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMMReminderRepository(mmReminderDao: MMReminderDao): MMReminderRepository {
+        return MMReminderRepository(mmReminderDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLabelRepository(labelDao: LabelDao): LabelRepository {
+        return LabelRepository(labelDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLabelTypeRepository(labelTypeDao: LabelTypeDao): LabelTypeRepository{
+        return LabelTypeRepository(labelTypeDao)
     }
 
 }

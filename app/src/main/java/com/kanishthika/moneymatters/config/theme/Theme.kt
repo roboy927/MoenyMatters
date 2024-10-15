@@ -26,7 +26,8 @@ private val LightColors = lightColorScheme(
     tertiary = tertiary,
     tertiaryContainer = tertiary_container,
     onSurfaceVariant = onBackground_variant,
-    onTertiaryContainer = onTertiaryContainer
+    onTertiaryContainer = onTertiaryContainer,
+    onSurface = onSurface
 )
 
 

@@ -9,9 +9,12 @@ class ExpenseRepository @Inject constructor(
 ): FinancialRepository<Expense> {
 
 
-
     override fun getAllItems(): Flow<List<Expense>> {
         return expenseDao.getAllExpenses()
+    }
+
+    override suspend fun getItemByName(name: String): Expense {
+        return expenseDao.getItemByName(name.uppercase()) ?: Expense(0,"", 0.0, "")
     }
 
     override suspend fun deleteItem(item: Expense) {

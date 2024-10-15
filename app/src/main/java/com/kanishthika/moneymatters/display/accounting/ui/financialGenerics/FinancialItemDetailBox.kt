@@ -1,6 +1,7 @@
 package com.kanishthika.moneymatters.display.accounting.ui.financialGenerics
 
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
@@ -116,6 +117,7 @@ fun <T : FinancialItem> FinancialItemDetailBox(
             }
         }
         DropdownMenu(
+            modifier = modifier.background(MaterialTheme.colorScheme.inverseSurface),
             expanded = isContextMenuVisible,
             onDismissRequest = {
                 isContextMenuVisible = false

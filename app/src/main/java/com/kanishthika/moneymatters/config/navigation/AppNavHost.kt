@@ -1,13 +1,19 @@
 package com.kanishthika.moneymatters.config.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -16,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.google.gson.Gson
 import com.kanishthika.moneymatters.display.account.ui.AccountViewModel
@@ -44,18 +51,30 @@ import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.AddLender
 import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.LenderModel
 import com.kanishthika.moneymatters.display.accounting.ui.AccountingScreen
 import com.kanishthika.moneymatters.display.accounting.ui.AccountingViewModel
-import com.kanishthika.moneymatters.display.dashboard.ui.DashBoardModel
 import com.kanishthika.moneymatters.display.dashboard.ui.HomeScreen
+import com.kanishthika.moneymatters.display.label.data.Label
+import com.kanishthika.moneymatters.display.label.ui.AddLabelScreen
+import com.kanishthika.moneymatters.display.label.ui.LabelListScreen
+import com.kanishthika.moneymatters.display.label.ui.labelType.AddLabelTypeScreen
+import com.kanishthika.moneymatters.display.label.ui.labelType.LabelTypeScreen
 import com.kanishthika.moneymatters.display.master.ui.MasterScreen
-import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.AddTransactionModel
-import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.AddTransactionScreen
+import com.kanishthika.moneymatters.display.reminder.data.MMReminder
+import com.kanishthika.moneymatters.display.reminder.ui.addReminder.AddReminderScreen
+import com.kanishthika.moneymatters.display.reminder.ui.reminderList.ReminderListScreen
+import com.kanishthika.moneymatters.display.transaction.data.Transaction
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.AddTransactionEvent
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.AddTransactionModel2
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.AddTransactionScreen2
 import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.TransactionSummaryDialog
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.element.TransactionLabelDialog
+import com.kanishthika.moneymatters.display.transaction.ui.addTransaction.element.TransactionReminderDialog
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.DisplayTransactionModel
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.DisplayTransactionScreen
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.searchScreen.SearchScreen
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.searchScreen.SearchTransactionModel
 
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun AppNavHost() {
     val modifier: Modifier = Modifier
@@ -67,31 +86,39 @@ fun AppNavHost() {
         navController = navController,
         startDestination = NavigationItem.Dashboard.route,
         enterTransition = {
-            fadeIn(
-                animationSpec = tween(300)
-            )
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(600))
         },
         exitTransition = {
-            fadeOut(tween(400))
-
+            fadeOut(
+                animationSpec = tween(400)
+            )
         },
         popEnterTransition = {
             fadeIn(animationSpec = tween(300))
         },
         popExitTransition = {
-            fadeOut(
-                animationSpec = tween(400)
-            )
+
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(600))
         }) {
+
         composable(NavigationItem.Dashboard.route) {
-            val accountViewModel: AccountViewModel = hiltViewModel()
-            val dashBoardModel: DashBoardModel = hiltViewModel()
-            HomeScreen(accountViewModel, dashBoardModel, navController)
+            HomeScreen(
+                navController = navController,
+                navigateToAddTransaction = {
+                    navController.navigate(NavigationItem.AddTransaction2.createAddTransactionScreen(null)) {
+                        launchSingleTop = true
+                        restoreState = true
+
+                    }
+                },
+                navigateTo = { navController.navigate(it) },
+                navigateToAddAccount = { navController.navigate(NavigationItem.AddAccount.route) }
+            )
         }
 
         composable(NavigationItem.AddAccount.route) {
             val accountViewModel: AccountViewModel = hiltViewModel()
-            AddAccountScreen(accountViewModel,navController = navController)
+            AddAccountScreen(accountViewModel, navController = navController)
         }
 
         dialog(
@@ -105,24 +132,69 @@ fun AppNavHost() {
             )
         }
 
-
-
         navigation(
-            startDestination = NavigationItem.AddTransaction.route, route = "AddTransaction"
+            startDestination = NavigationItem.AddTransaction2.route, route = "AddTransaction"
         ) {
-            composable(NavigationItem.AddTransaction.route) {
-                val addTransactionModel =
-                    it.sharedViewmodel<AddTransactionModel>(navController = navController)
-                AddTransactionScreen(addTransactionModel, modifier, navController)
+            composable(
+                NavigationItem.AddTransaction2.route
+            ) {
+                val transactionJson = it.arguments?.getString("transaction")
+                val transaction = gson.fromJson(transactionJson, Transaction::class.java)
+                val addTransactionModel2: AddTransactionModel2 =
+                    it.sharedViewmodel(navController = navController)
+                AddTransactionScreen2(
+                    next = { navController.navigate(NavigationItem.TransactionSummaryDialog.route) },
+                    openReminderDialog = { navController.navigate(NavigationItem.TransactionReminder.route) },
+                    viewModel = addTransactionModel2,
+                    selectLAbelDialogN = { navController.navigate(NavigationItem.TransactionLabelDialog.route)},
+                    transaction = transaction
+                )
             }
             dialog(
                 NavigationItem.TransactionSummaryDialog.route
             ) {
-                val addTransactionModel: AddTransactionModel =
+                val addTransactionModel: AddTransactionModel2 =
                     it.sharedViewmodel(navController = navController)
+                val addTransactionState by addTransactionModel.addTransactionState.collectAsStateWithLifecycle()
                 TransactionSummaryDialog(
-                    modifier = modifier, addTransactionModel = addTransactionModel, navController
+                    modifier = modifier,
+                    transactionUiState = addTransactionState,
+                    onSubmit = { transaction ->
+                        if (transaction == null) {
+                            addTransactionModel.onEvent(AddTransactionEvent.AddTransaction)
+                        } else {
+                            addTransactionModel.onEvent(AddTransactionEvent.UpdateTransaction(transaction))
+                            navController.navigateUp()
+                        }
+                        navController.navigateUp()
+                    },
+                    onEdit = { navController.navigateUp() },
                 )
+            }
+            dialog(
+                route = NavigationItem.TransactionReminder.route,
+                dialogProperties = DialogProperties(
+                    dismissOnClickOutside = false
+                )
+            ) {
+                val addTransactionModel2: AddTransactionModel2 =
+                    it.sharedViewmodel(navController = navController)
+                TransactionReminderDialog(
+                    modifier = modifier,
+                    addTransactionModel2 = addTransactionModel2
+                ) { navController.popBackStack() }
+            }
+            dialog(
+                route = NavigationItem.TransactionLabelDialog.route,
+                dialogProperties = DialogProperties(
+                    dismissOnClickOutside = false
+                )
+            ) {
+                val addTransactionModel2: AddTransactionModel2 =
+                    it.sharedViewmodel(navController = navController)
+                TransactionLabelDialog(addTransactionModel2 = addTransactionModel2){
+                    navController.navigateUp()
+                }
             }
         }
 
@@ -217,7 +289,11 @@ fun AppNavHost() {
             DisplayTransactionScreen(
                 modifier = modifier,
                 displayTransactionModel = displayTransactionModel,
-                navController = navController
+                navController = navController,
+                navigateToEdit = {
+                    val transaction = gson.toJson(it)
+                    navController.navigate(NavigationItem.AddTransaction2.createAddTransactionScreen(transaction))
+                }
             )
         }
 
@@ -242,12 +318,87 @@ fun AppNavHost() {
             )
         }
 
-        composable(NavigationItem.Master.route){
+        composable(NavigationItem.Master.route) {
             MasterScreen(modifier = modifier, navController = navController)
         }
+
+        composable(
+            NavigationItem.AddReminderScreen.route
+        ) { backStackEntry ->
+            val reminderJson = backStackEntry.arguments?.getString("reminder")
+            val reminder = gson.fromJson(reminderJson, MMReminder::class.java)
+            AddReminderScreen(
+                modifier,
+                navigateUp = {
+                    navController.navigate(
+                        NavigationItem.ReminderListScreen.createReminderListScreen(
+                            null
+                        )
+                    ) {
+                        popUpTo(NavigationItem.AddReminderScreen.route) { inclusive = true }
+                    }
+                },
+                reminder = reminder
+            )
+        }
+
+        composable(
+            NavigationItem.ReminderListScreen.route,
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "mm://reminders/{reminderID}"
+            })
+        ) { backStackEntry ->
+            val reminderID = backStackEntry.arguments?.getString("reminderID")
+            ReminderListScreen(
+                modifier = modifier,
+                reminderId = reminderID,
+                navigateToAdd = { navController.navigate(NavigationItem.AddReminderScreen.route) },
+                editReminderNavigate = { reminder ->
+                    navController.navigate(
+                        NavigationItem.AddReminderScreen.createAddReminderScreen(
+                            gson.toJson(
+                                reminder
+                            )
+                        )
+                    )
+                }
+            )
+        }
+
+        dialog(
+            NavigationItem.AddLabelTypeDialog.route
+        ) {
+            AddLabelTypeScreen(modifier = modifier, onBack = { navController.navigateUp() })
+        }
+
+        composable(
+            NavigationItem.LabelTypeScreen.route
+        ) {
+            LabelTypeScreen(navigateToAdd = { navController.navigate(NavigationItem.AddLabelTypeDialog.route) })
+        }
+
+        composable(
+            NavigationItem.AddLabelScreen.route
+        ) { backStackEntry ->
+            val labelJson = backStackEntry.arguments?.getString("label")
+            val label = gson.fromJson(labelJson, Label::class.java)
+            AddLabelScreen(label = label) {
+                navController.navigate(NavigationItem.AddLabelTypeDialog.route)
+            }
+        }
+
+        composable(
+            NavigationItem.LabelListScreen.route
+        ) {
+            LabelListScreen(navigateToAdd = {
+                navController.navigate(
+                    NavigationItem.AddLabelScreen.createAddLabelScreen(
+                        null
+                    )
+                )
+            })
+        }
     }
-
-
 }
 
 @Composable

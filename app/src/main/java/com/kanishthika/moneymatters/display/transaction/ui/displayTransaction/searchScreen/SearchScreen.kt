@@ -1,6 +1,5 @@
 package com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.searchScreen
 
-import TransactionListScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kanishthika.moneymatters.config.utils.clickableOnce
+import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.TransactionListScreen
 
 @Composable
 fun SearchScreen(
@@ -134,7 +134,9 @@ fun SearchScreen(
                     "No Data Found"
                 } else {
                     "Enter Word to Search"
-                }
+                },
+                navigateToEdit = {},
+                deleteTxn = {}
             )
         }
     }

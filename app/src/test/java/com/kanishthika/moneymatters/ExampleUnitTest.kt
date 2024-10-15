@@ -1,8 +1,6 @@
 package com.kanishthika.moneymatters
 
-import android.util.Log
 import org.junit.Test
-import java.time.LocalDate
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,6 +10,6 @@ import java.time.LocalDate
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-       Log.d("TAG", "${LocalDate.now().year}")
+
     }
 }

@@ -25,4 +25,7 @@ interface LenderDao {
     @Delete
     suspend fun deleteLender (lender: Lender)
 
+    @Query("SELECT * FROM lenders_list WHERE lenderName = :name LIMIT 1")
+    suspend fun getItemByName(name: String): Lender?
+
 }

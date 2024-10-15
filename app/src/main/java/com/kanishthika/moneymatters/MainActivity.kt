@@ -16,7 +16,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-
     private val viewModel: SplashModel by viewModels ()
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -32,6 +31,5 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
 
