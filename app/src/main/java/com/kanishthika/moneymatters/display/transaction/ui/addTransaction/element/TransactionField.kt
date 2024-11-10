@@ -73,14 +73,6 @@ fun TransactionField(
             selectedTxnType = selectedTxnType
         ) { transactionType -> onChangeTXnType(transactionType) }
 
-        MMOutlinedTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
-            labelText = "Description",
-            modifier = modifier.fillMaxWidth(),
-            keyboardActions = focusNext
-        )
-
 
         MMOutlinedTextField(
             modifier = modifier.fillMaxWidth(),
@@ -88,6 +80,14 @@ fun TransactionField(
             onValueChange = { onAmountChange(it) },
             labelText = "Amount",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            keyboardActions = focusNext
+        )
+
+        MMOutlinedTextField(
+            value = description,
+            onValueChange = onDescriptionChange,
+            labelText = "Description",
+            modifier = modifier.fillMaxWidth(),
             keyboardActions = focusNext
         )
 

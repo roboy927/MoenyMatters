@@ -48,11 +48,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kanishthika.moneymatters.config.reminder.NotificationPermissionHandler
+import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.display.dashboard.data.menuItems
 import com.kanishthika.moneymatters.display.dashboard.ui.element.AccountsDisplayCards
 import com.kanishthika.moneymatters.display.dashboard.ui.element.DashBoardTransactionView
 import com.kanishthika.moneymatters.display.dashboard.ui.element.DashboardSummaryView
 import com.kanishthika.moneymatters.display.dashboard.ui.element.Menu
+import java.text.DecimalFormat
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,12 +169,12 @@ fun HomeScreen(
                 AccountsDisplayCards(
                     modifier,
                     accounts = dashBoardUiState.accountList,
-                    deleteAccount = {},
+                    deleteAccount = { dashBoardModel.deleteAccount(it)},
                     scope,
                     snackBarHostState = snackBarHostState,
                     addAccountScreen = navigateToAddAccount,
                     getBalance = {
-                        dashBoardModel.getAccountBalance(it.name).toString()
+                        DecimalFormat("#.##").format(dashBoardModel.getAccountBalance(capitalizeWords(it.name)))
                     }
                 )
             }

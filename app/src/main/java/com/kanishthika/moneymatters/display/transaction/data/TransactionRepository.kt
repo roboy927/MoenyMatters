@@ -47,6 +47,12 @@ class TransactionRepository @Inject constructor(
 
     }
 
+    suspend fun getTotalAmounts(accountingType:String): Map<String, Double> {
+        val totalAmounts = transactionDao.getTotalAmounts(accountingType)
+        return totalAmounts.associate { it.accountingName to it.totalAmount }
+
+    }
+
     suspend fun getAmountOfAccountingType(monthYear: String, accountingType: String): Double {
         return transactionDao.getAmountOfAccountingType(monthYear, accountingType) ?: 0.0
     }

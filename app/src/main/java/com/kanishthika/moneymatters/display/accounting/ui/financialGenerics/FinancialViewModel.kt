@@ -73,6 +73,25 @@ abstract class BaseFinancialModel<T>(
         }
     }
 
+    private fun fetchTotalAmounts() {
+        _uiState.update {
+            it.copy(isAmountLoading = true)
+        }
+
+        viewModelScope.launch {
+            delay(500)
+            val totalAmounts = transactionRepository.getTotalAmounts(
+                accountingType = getAccountingType().getName()
+            )
+            _uiState.update {
+                it.copy(
+                    totalAmount = totalAmounts,
+                    isAmountLoading = false
+                )
+            }
+        }
+    }
+
     abstract fun getAccountingType(): AccountingType
 
     fun changeMonthText(monthText: String) {
@@ -96,7 +115,7 @@ abstract class BaseFinancialModel<T>(
             )
         }
         when (amountViewType) {
-            AmountViewType.TOTAL -> fetchAllItems()
+            AmountViewType.TOTAL -> fetchTotalAmounts()
             AmountViewType.MONTH -> fetchMonthlyAmounts(
                 convertDateToMonthYearString(LocalDate.now().toString(), "yyyy-MM-dd")
             )
@@ -188,13 +207,6 @@ abstract class BaseFinancialModel<T>(
     fun changeSelectedItem(item: T) {
         _uiState.update { it.copy(selectedItem = item) }
     }
-
-    //Method used in insurance and Loan
-
-
-
-
-
 
     fun isAnyFieldIsEmpty(uiState: FinancialUiState<T>): Boolean {
         return uiState.name.isEmpty() || uiState.amount.isEmpty() || uiState.description.isEmpty()

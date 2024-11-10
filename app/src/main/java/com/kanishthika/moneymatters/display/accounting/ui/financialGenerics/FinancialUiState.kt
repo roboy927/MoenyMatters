@@ -12,6 +12,7 @@ data class FinancialUiState<T : FinancialItem>(
     val amount: String = "",
     val description: String = "",
     val selectedItem: T? = null,
+    val totalAmount: Map<String, Double> = emptyMap(),
     val monthlyAmounts: Map<String, Double> = emptyMap(),
     val yearlyAmount: Double = 0.0,
     val amountViewType: AmountViewType = AmountViewType.TOTAL,

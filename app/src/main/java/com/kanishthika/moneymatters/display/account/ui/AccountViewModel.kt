@@ -2,6 +2,7 @@ package com.kanishthika.moneymatters.display.account.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.display.account.data.Account
 import com.kanishthika.moneymatters.display.account.data.AccountRepository
 import com.kanishthika.moneymatters.display.account.data.accountType.AccountType
@@ -53,7 +54,7 @@ class AccountViewModel @Inject constructor(
             repository.insertAccount(
                 Account(
                     0,
-                    uiState.value.name,
+                    capitalizeWords(uiState.value.name) ,
                     uiState.value.type.name,
                     uiState.value.amount.toDouble()
                 )

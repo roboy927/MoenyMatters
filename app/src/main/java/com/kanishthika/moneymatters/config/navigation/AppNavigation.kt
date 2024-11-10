@@ -35,7 +35,8 @@ enum class Screen {
     ADDLABELSCREEN,
     LABELLISTSCREEN,
 
-    TRANSACTIONLABELDIALOG
+    TRANSACTIONLABELDIALOG,
+    TRANSFERTOSELFSCREEN
 
 }
 
@@ -115,5 +116,7 @@ sealed class NavigationItem(val route: String) {
 
     object LabelListScreen: NavigationItem(Screen.LABELLISTSCREEN.name)
     object TransactionLabelDialog: NavigationItem(Screen.TRANSACTIONLABELDIALOG.name)
+
+    object TransferToSelfScreen: NavigationItem(Screen.TRANSFERTOSELFSCREEN.name)
 
 }

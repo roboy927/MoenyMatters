@@ -21,8 +21,8 @@ fun menuItems(): List<MenuItem> {
     return listOf(
         MenuItem(
             ImageVector.vectorResource(id = R.drawable.lender),
-            "Expense",
-            NavigationItem.AddExpense.createAddExpenseScreen(null)
+            "TTS",
+            NavigationItem.TransferToSelfScreen.route
         ),
         MenuItem(
             ImageVector.vectorResource(id = R.drawable.investment),

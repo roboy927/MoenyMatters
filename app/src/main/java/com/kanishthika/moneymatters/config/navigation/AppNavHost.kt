@@ -72,6 +72,8 @@ import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.Di
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.DisplayTransactionScreen
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.searchScreen.SearchScreen
 import com.kanishthika.moneymatters.display.transaction.ui.displayTransaction.searchScreen.SearchTransactionModel
+import com.kanishthika.moneymatters.display.transaction.ui.tts.TransferToSelfScreen
+import com.kanishthika.moneymatters.display.transaction.ui.tts.TtsViewModel
 
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -397,6 +399,13 @@ fun AppNavHost() {
                     )
                 )
             })
+        }
+
+        composable(
+            NavigationItem.TransferToSelfScreen.route
+        ){
+            val viewModel: TtsViewModel = hiltViewModel()
+            TransferToSelfScreen(viewModel = viewModel, next = { navController.navigateUp() })
         }
     }
 }

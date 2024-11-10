@@ -38,6 +38,9 @@ interface TransactionDao {
     @Query("SELECT accountingName, SUM(amount) as totalAmount FROM transaction_list WHERE date LIKE '%' || :monthYear || '%' AND accountingType = :accountingType GROUP BY accountingName")
     suspend fun getMonthlyAmounts(monthYear: String, accountingType: String): List<MonthlyAmount>
 
+    @Query("SELECT accountingName, SUM(amount) as totalAmount FROM transaction_list WHERE accountingType = :accountingType GROUP BY accountingName")
+    suspend fun getTotalAmounts(accountingType: String): List<MonthlyAmount>
+
     @Query("SELECT SUM(amount) FROM transaction_list WHERE date LIKE '%' || :monthYear || '%' AND accountingType = :accountingType")
     suspend fun getAmountOfAccountingType(monthYear: String, accountingType: String): Double?
 

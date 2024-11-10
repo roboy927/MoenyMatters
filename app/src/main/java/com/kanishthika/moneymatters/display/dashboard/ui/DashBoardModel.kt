@@ -3,6 +3,7 @@ package com.kanishthika.moneymatters.display.dashboard.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kanishthika.moneymatters.display.account.data.Account
 import com.kanishthika.moneymatters.display.account.data.AccountRepository
 import com.kanishthika.moneymatters.display.accounting.data.AccountingType
 import com.kanishthika.moneymatters.display.accounting.data.AmountViewType
@@ -85,6 +86,11 @@ class DashBoardModel @Inject constructor(
             it.copy(
                 backPressedOnce = boolean
             )
+        }
+    }
+    fun deleteAccount(account: Account){
+        viewModelScope.launch {
+            accountRepository.deleteAccount(account)
         }
     }
 
