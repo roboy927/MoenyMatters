@@ -36,7 +36,11 @@ enum class Screen {
     LABELLISTSCREEN,
 
     TRANSACTIONLABELDIALOG,
-    TRANSFERTOSELFSCREEN
+    TRANSFERTOSELFSCREEN,
+
+    BACKUPSCREEN,
+    SIGNINSCREEN,
+    PROFILESCREEN
 
 }
 
@@ -118,5 +122,13 @@ sealed class NavigationItem(val route: String) {
     object TransactionLabelDialog: NavigationItem(Screen.TRANSACTIONLABELDIALOG.name)
 
     object TransferToSelfScreen: NavigationItem(Screen.TRANSFERTOSELFSCREEN.name)
+
+    object BackUpScreen : NavigationItem("${Screen.BACKUPSCREEN.name}?accountId={accountId}&accountEmail={accountEmail}")
+
+    // Function to generate the route with arguments
+    fun backUpScreen(accountId: String?, accountEmail: String?) =
+        "${Screen.BACKUPSCREEN.name}?accountId=$accountId&accountEmail=$accountEmail"
+    object SignInScreen: NavigationItem(Screen.SIGNINSCREEN.name)
+    object ProfileScreen: NavigationItem(Screen.PROFILESCREEN.name)
 
 }

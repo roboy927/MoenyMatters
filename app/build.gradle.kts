@@ -12,6 +12,7 @@ android {
     namespace = "com.kanishthika.moneymatters"
     compileSdk = 34
 
+
     defaultConfig {
         applicationId = "com.kanishthika.moneymatters"
         minSdk = 26
@@ -89,8 +90,24 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
     implementation("androidx.compose.material3:material3-android:1.3.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose-android:2.8.5")
-    implementation("com.google.firebase:firebase-auth:23.0.0")
 
+
+    implementation("com.google.firebase:firebase-auth:23.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+ /// -------- new
+    implementation ("com.google.guava:guava:24.1-jre")
+// Guava fix
+    implementation ("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
+
+//Drive
+    implementation("com.google.api-client:google-api-client-android:1.23.0") {
+        exclude ("org.apache.httpcomponents")
+        exclude (module = "guava-jdk5" )
+    }
+    implementation("com.google.apis:google-api-services-drive:v3-rev136-1.25.0") {
+        exclude ("org.apache.httpcomponents")
+        exclude (module = "guava-jdk5" )
+    }
 
 
     testImplementation("junit:junit:4.13.2")
@@ -129,11 +146,7 @@ dependencies {
 
     implementation ("com.google.code.gson:gson:2.10.1")
 
-    implementation ("com.google.accompanist:accompanist-flowlayout:0.31.0-alpha")
-
-    implementation ("com.google.android.gms:play-services-auth:21.2.0")
-
-    implementation ("androidx.credentials:credentials:1.3.0")
+    implementation ("io.coil-kt:coil-compose:2.2.2")
 
 
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.reminder.NotificationPermissionHandler
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.display.dashboard.data.menuItems
@@ -65,7 +67,7 @@ fun HomeScreen(
     navController: NavController,
     navigateToAddTransaction: ()-> Unit,
     navigateToAddAccount: ()-> Unit,
-    navigateTo: (String) -> Unit
+    navigateTo: (String) -> Unit,
 ) {
 
     val scope = rememberCoroutineScope()
@@ -112,7 +114,14 @@ fun HomeScreen(
                 scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
                 colors = TopAppBarDefaults.mediumTopAppBarColors(MaterialTheme.colorScheme.background),
                 actions = {
-                    IconButton(onClick = { /* Handle settings */ }) {
+                    IconButton(onClick = { navController.navigate(NavigationItem.SignInScreen.route) }) {
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = "Account",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(NavigationItem.BackUpScreen.route) }) {
                         Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Settings",

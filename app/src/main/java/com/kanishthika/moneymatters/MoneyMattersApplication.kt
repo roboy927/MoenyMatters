@@ -4,16 +4,25 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import com.kanishthika.moneymatters.config.database.AccountDatabase
 import com.kanishthika.moneymatters.config.reminder.NotificationService
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 
 @HiltAndroidApp
 class MoneyMattersApplication: Application() {
+    @Inject
+    lateinit var accountDatabase: AccountDatabase
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        accountDatabase.close() // Close the database connection
     }
 
     private fun createNotificationChannel() {

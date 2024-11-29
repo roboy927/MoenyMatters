@@ -2,6 +2,15 @@ package com.kanishthika.moneymatters.config.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.drive.Drive
+import com.google.api.services.drive.DriveScopes
 import com.kanishthika.moneymatters.config.database.AccountDatabase
 import com.kanishthika.moneymatters.display.account.data.AccountDao
 import com.kanishthika.moneymatters.display.account.data.accountType.AccountTypeDao
@@ -33,6 +42,34 @@ class AppModule{
         Room.databaseBuilder(context, AccountDatabase::class.java, "AccountDB")
         .createFromAsset("database/defaultMM.db")
             .build()
+
+    @Provides
+    @Singleton
+    fun provideGoogleSignInClient(@ApplicationContext context: Context): GoogleSignInClient {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+            .build()
+        return GoogleSignIn.getClient(context, gso)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDriveService(
+        @ApplicationContext context: Context,
+    ): Drive {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+            ?: throw IllegalStateException("No signed-in Google account found")
+        val credential = GoogleAccountCredential.usingOAuth2(
+            context, setOf(DriveScopes.DRIVE_FILE)
+        )
+        credential.selectedAccount = account.account
+        return Drive.Builder(
+            NetHttpTransport(),
+            JacksonFactory.getDefaultInstance(),
+            credential
+        ).setApplicationName("Money Matters").build()
+    }
 
     @Provides
     fun provideAccountDao(accountDatabase: AccountDatabase): AccountDao = accountDatabase.accountDao()

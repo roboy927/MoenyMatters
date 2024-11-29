@@ -1,5 +1,6 @@
 package com.kanishthika.moneymatters.config.navigation
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -52,6 +53,7 @@ import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.LenderMod
 import com.kanishthika.moneymatters.display.accounting.ui.AccountingScreen
 import com.kanishthika.moneymatters.display.accounting.ui.AccountingViewModel
 import com.kanishthika.moneymatters.display.dashboard.ui.HomeScreen
+import com.kanishthika.moneymatters.display.googleSignIn.SignInScreen
 import com.kanishthika.moneymatters.display.label.data.Label
 import com.kanishthika.moneymatters.display.label.ui.AddLabelScreen
 import com.kanishthika.moneymatters.display.label.ui.LabelListScreen
@@ -76,9 +78,18 @@ import com.kanishthika.moneymatters.display.transaction.ui.tts.TransferToSelfScr
 import com.kanishthika.moneymatters.display.transaction.ui.tts.TtsViewModel
 
 
+@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewmodel(navController: NavController): T {
+    val parentRoute = destination.parent?.route ?: return hiltViewModel()
+    val parentEntry = remember(this) {
+        navController.getBackStackEntry(parentRoute)
+    }
+    return hiltViewModel(parentEntry)
+}
+
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun AppNavHost() {
+fun AppNavHost(applicationContext: Context) {
     val modifier: Modifier = Modifier
     val navController = rememberNavController()
 
@@ -107,14 +118,18 @@ fun AppNavHost() {
             HomeScreen(
                 navController = navController,
                 navigateToAddTransaction = {
-                    navController.navigate(NavigationItem.AddTransaction2.createAddTransactionScreen(null)) {
+                    navController.navigate(
+                        NavigationItem.AddTransaction2.createAddTransactionScreen(
+                            null
+                        )
+                    ) {
                         launchSingleTop = true
                         restoreState = true
 
                     }
                 },
                 navigateTo = { navController.navigate(it) },
-                navigateToAddAccount = { navController.navigate(NavigationItem.AddAccount.route) }
+                navigateToAddAccount = { navController.navigate(NavigationItem.AddAccount.route) },
             )
         }
 
@@ -148,7 +163,7 @@ fun AppNavHost() {
                     next = { navController.navigate(NavigationItem.TransactionSummaryDialog.route) },
                     openReminderDialog = { navController.navigate(NavigationItem.TransactionReminder.route) },
                     viewModel = addTransactionModel2,
-                    selectLAbelDialogN = { navController.navigate(NavigationItem.TransactionLabelDialog.route)},
+                    selectLAbelDialogN = { navController.navigate(NavigationItem.TransactionLabelDialog.route) },
                     transaction = transaction
                 )
             }
@@ -165,7 +180,11 @@ fun AppNavHost() {
                         if (transaction == null) {
                             addTransactionModel.onEvent(AddTransactionEvent.AddTransaction)
                         } else {
-                            addTransactionModel.onEvent(AddTransactionEvent.UpdateTransaction(transaction))
+                            addTransactionModel.onEvent(
+                                AddTransactionEvent.UpdateTransaction(
+                                    transaction
+                                )
+                            )
                             navController.navigateUp()
                         }
                         navController.navigateUp()
@@ -194,7 +213,7 @@ fun AppNavHost() {
             ) {
                 val addTransactionModel2: AddTransactionModel2 =
                     it.sharedViewmodel(navController = navController)
-                TransactionLabelDialog(addTransactionModel2 = addTransactionModel2){
+                TransactionLabelDialog(addTransactionModel2 = addTransactionModel2) {
                     navController.navigateUp()
                 }
             }
@@ -294,7 +313,11 @@ fun AppNavHost() {
                 navController = navController,
                 navigateToEdit = {
                     val transaction = gson.toJson(it)
-                    navController.navigate(NavigationItem.AddTransaction2.createAddTransactionScreen(transaction))
+                    navController.navigate(
+                        NavigationItem.AddTransaction2.createAddTransactionScreen(
+                            transaction
+                        )
+                    )
                 }
             )
         }
@@ -403,18 +426,65 @@ fun AppNavHost() {
 
         composable(
             NavigationItem.TransferToSelfScreen.route
-        ){
+        ) {
             val viewModel: TtsViewModel = hiltViewModel()
             TransferToSelfScreen(viewModel = viewModel, next = { navController.navigateUp() })
         }
+
+
+
+
+        composable(NavigationItem.SignInScreen.route) {
+
+            SignInScreen(
+
+                /*navigateToProfile = {
+                    navController.navigate(NavigationItem.ProfileScreen.route) {
+                       popUpTo(NavigationItem.SignInScreen.route) { inclusive = true }
+                    }
+                }*/
+            )
+        }
+
     }
+    // val viewModel = viewModel<SignInViewModel>()
+    /* val state by viewModel.state.collectAsStateWithLifecycle()
+
+     LaunchedEffect(key1 = Unit) {
+         if(googleAuthUiClient.getSignedInUser() != null) {
+             navController.navigate(NavigationItem.ProfileScreen.route)
+         }
+     }
+
+     val launcher = rememberLauncherForActivityResult(
+         contract = ActivityResultContracts.StartIntentSenderForResult(),
+         onResult = { result ->
+             if(result.resultCode == RESULT_OK) {
+                 lifecycleCoroutineScope.launch {
+                     val signInResult = googleAuthUiClient.signInWithIntent(
+                         intent = result.data ?: return@launch
+                     )
+                     viewModel.onSignInResult(signInResult)
+                 }
+             }
+         }
+     )
+
+     LaunchedEffect(key1 = state.isSignInSuccessful) {
+         if(state.isSignInSuccessful) {
+             Toast.makeText(
+                 context,
+                 "Sign in successful",
+                 Toast.LENGTH_LONG
+             ).show()
+
+             navController.navigate(NavigationItem.Dashboard.route)
+             viewModel.resetState()
+         }
+     }
+*/
+
 }
 
-@Composable
-inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewmodel(navController: NavController): T {
-    val parentRoute = destination.parent?.route ?: return hiltViewModel()
-    val parentEntry = remember(this) {
-        navController.getBackStackEntry(parentRoute)
-    }
-    return hiltViewModel(parentEntry)
-}
+
+
