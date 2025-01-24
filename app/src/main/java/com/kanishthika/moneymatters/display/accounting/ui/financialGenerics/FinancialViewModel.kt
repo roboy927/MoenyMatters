@@ -4,6 +4,7 @@ package com.kanishthika.moneymatters.display.accounting.ui.financialGenerics
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kanishthika.moneymatters.config.utils.capitalizeWords
 import com.kanishthika.moneymatters.config.utils.convertDateToMonthYearString
 import com.kanishthika.moneymatters.display.accounting.data.AccountingType
 import com.kanishthika.moneymatters.display.accounting.data.AmountViewType
@@ -21,7 +22,7 @@ import java.time.LocalDate
 
 abstract class BaseFinancialModel<T>(
     private val repository: FinancialRepository<T>,
-    private val transactionRepository: TransactionRepository
+    val transactionRepository: TransactionRepository
 ) : ViewModel() where T : FinancialItem {
 
     protected val _uiState = MutableStateFlow(FinancialUiState<T>())
@@ -35,6 +36,7 @@ abstract class BaseFinancialModel<T>(
 
     init {
         fetchAllItems()
+        changeAmountViewTypeState(AmountViewType.TOTAL)
     }
 
     private fun fetchAllItems() {
@@ -46,24 +48,31 @@ abstract class BaseFinancialModel<T>(
             repository.getAllItems().collect { items ->
                 _items.value = items
                 _uiState.update {
-                    it.copy(isAmountLoading = false)
+                    it.copy(
+                        isAmountLoading = false,
+                    )
                 }
                 _isLoading.value = false
             }
+
         }
     }
 
-    private fun fetchMonthlyAmounts(monthYear: String) {
+    private fun calculateFinancialItemsAmount(monthYear: String?) {
         _uiState.update {
             it.copy(isAmountLoading = true)
         }
-
         viewModelScope.launch {
             delay(500)
-            val monthlyAmounts = transactionRepository.getMonthlyAmounts(
-                monthYear = monthYear,
-                accountingType = getAccountingType().getName()
-            )
+            val monthlyAmounts = when(getAccountingType()) {
+                AccountingType.LENDER -> calculateLenderAmount(monthYear)
+                AccountingType.BORROWER -> calculateBorrowerAmount(monthYear)
+                else -> transactionRepository.getMonthlyAmounts(
+                    monthYear = monthYear,
+                    accountingType = getAccountingType().getName()
+                )
+            }
+
             _uiState.update {
                 it.copy(
                     monthlyAmounts = monthlyAmounts,
@@ -73,22 +82,38 @@ abstract class BaseFinancialModel<T>(
         }
     }
 
-    private fun fetchTotalAmounts() {
-        _uiState.update {
-            it.copy(isAmountLoading = true)
-        }
+    private fun isBorrowerType(): Boolean {
+        return getAccountingType() == AccountingType.BORROWER
+    }
 
-        viewModelScope.launch {
-            delay(500)
-            val totalAmounts = transactionRepository.getTotalAmounts(
-                accountingType = getAccountingType().getName()
-            )
-            _uiState.update {
-                it.copy(
-                    totalAmount = totalAmounts,
-                    isAmountLoading = false
-                )
-            }
+    /**
+     * Custom function to calculate Borrower-specific monthly amounts
+     */
+    private suspend fun calculateBorrowerAmount(monthYear: String?): Map<String, Double> {
+        val borrowerWiseAmounts = transactionRepository.getMonthlyAmounts(
+            monthYear = monthYear,
+            accountingType = AccountingType.BORROWER.getName()
+        )
+        val returnFromBorrowerWiseAmounts = transactionRepository.getMonthlyAmounts(
+            monthYear = monthYear,
+            accountingType = AccountingType.RETURNFROMBORROWER.getName()
+        )
+        return borrowerWiseAmounts.mapValues { (name, amount) ->
+            amount - (returnFromBorrowerWiseAmounts[name] ?: 0.0)
+        }
+    }
+
+    private suspend fun calculateLenderAmount(monthYear: String?): Map<String, Double> {
+        val lenderWiseAmounts = transactionRepository.getMonthlyAmounts(
+            monthYear = monthYear,
+            accountingType = AccountingType.LENDER.getName()
+        )
+        val returnToLenderWiseAmounts = transactionRepository.getMonthlyAmounts(
+            monthYear = monthYear,
+            accountingType = AccountingType.RETURNTOLENDER.getName()
+        )
+        return lenderWiseAmounts.mapValues { (name, amount) ->
+            amount - (returnToLenderWiseAmounts[name] ?: 0.0)
         }
     }
 
@@ -110,33 +135,33 @@ abstract class BaseFinancialModel<T>(
         _uiState.update {
             it.copy(
                 amountViewType = amountViewType,
-                monthText = "Current Month",
-                yearText = "Current Year"
+                monthText = convertDateToMonthYearString(LocalDate.now().toString(), "yyyy-MM-dd"),
+                yearText = LocalDate.now().year.toString()
             )
         }
         when (amountViewType) {
-            AmountViewType.TOTAL -> fetchTotalAmounts()
-            AmountViewType.MONTH -> fetchMonthlyAmounts(
+            AmountViewType.TOTAL -> calculateFinancialItemsAmount(null)
+            AmountViewType.MONTH -> calculateFinancialItemsAmount(
                 convertDateToMonthYearString(LocalDate.now().toString(), "yyyy-MM-dd")
             )
-            AmountViewType.YEAR -> fetchMonthlyAmounts(LocalDate.now().year.toString())
+            AmountViewType.YEAR -> calculateFinancialItemsAmount(LocalDate.now().year.toString())
         }
     }
 
     fun changeMonth(monthYear: String) {
-        fetchMonthlyAmounts(monthYear)
+        calculateFinancialItemsAmount(monthYear)
     }
 
     fun changeYear(year: String) {
-        fetchMonthlyAmounts(year)
+        calculateFinancialItemsAmount(year)
     }
 
     fun sortItems(sortType: String) {
         _items.value = when (sortType) {
             "Name Ascending" -> _items.value.sortedBy {it .name }
             "Name Descending" -> _items.value.sortedByDescending { it.name }
-            "Amount Ascending" -> _items.value.sortedBy { it.amount }
-            "Amount Descending" -> _items.value.sortedByDescending { it.amount }
+            "Amount Ascending" -> _items.value.sortedBy { it.amount + (uiState.value.monthlyAmounts[capitalizeWords(it.name) ] ?: 0.0) }
+            "Amount Descending" -> _items.value.sortedByDescending { it.amount + (uiState.value.monthlyAmounts[capitalizeWords(it.name)] ?: 0.0) }
             else -> _items.value
         }
     }

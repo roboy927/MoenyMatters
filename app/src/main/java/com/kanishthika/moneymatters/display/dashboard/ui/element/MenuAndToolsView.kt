@@ -19,18 +19,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.kanishthika.moneymatters.display.dashboard.data.MenuItem
+import com.kanishthika.moneymatters.display.dashboard.data.ClickableItem
 
 @Composable
 fun Menu(
-    menuItems: List<MenuItem>,
+    clickableItems: List<ClickableItem>,
     navigateTo:(String)-> Unit,
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ){
-        itemsIndexed(menuItems) { _, menuItem ->
-            MenuItemView(menuItem = menuItem) {
+        itemsIndexed(clickableItems) { _, menuItem ->
+            MenuItemView(clickableItem = menuItem) {
                 navigateTo(menuItem.route)
             }
         }
@@ -38,7 +38,7 @@ fun Menu(
 }
 
 @Composable
-fun MenuItemView(menuItem: MenuItem, onClick: () -> Unit) {
+fun MenuItemView(clickableItem: ClickableItem, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -53,8 +53,8 @@ fun MenuItemView(menuItem: MenuItem, onClick: () -> Unit) {
             )
         ) {
             Icon(
-                menuItem.icon,
-                menuItem.label,
+                clickableItem.icon,
+                clickableItem.label,
                 modifier = Modifier
                     .fillMaxSize(),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
@@ -62,7 +62,7 @@ fun MenuItemView(menuItem: MenuItem, onClick: () -> Unit) {
         }
         Text(
             modifier = Modifier.padding(4.dp, 4.dp, 4.dp, 4.dp),
-            text = menuItem.label,
+            text = clickableItem.label,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onBackground

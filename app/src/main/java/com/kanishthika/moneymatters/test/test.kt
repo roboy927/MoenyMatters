@@ -1,7 +1,4 @@
 package com.kanishthika.moneymatters.test
 
-fun main() {
-
-
-
-}
+import com.kanishthika.moneymatters.display.transaction.data.TransactionRepository
+import javax.inject.Inject

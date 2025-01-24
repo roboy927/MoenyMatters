@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -68,6 +69,7 @@ fun TransactionListScreen(
                         AccountingType.INSURANCE -> ImageVector.vectorResource(id = R.drawable.insurance)
                         AccountingType.LOAN -> ImageVector.vectorResource(id = R.drawable.loan)
                         AccountingType.OTHER -> Icons.Default.Info
+                        AccountingType.TTS -> Icons.Default.Refresh
                     } ,
                     iconBackground = when (stringToTransactionType(transaction.type) ) {
                         TransactionType.CREDIT -> MaterialTheme.colorScheme.primary.copy(0.8f)

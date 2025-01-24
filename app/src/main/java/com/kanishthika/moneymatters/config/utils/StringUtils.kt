@@ -14,7 +14,7 @@ fun formatTo2Decimal(input: String): String {
     // Allow empty input
     if (input.isEmpty()) return ""
 
-    val decimalFormat = DecimalFormat("#.##")
+    val decimalFormat = DecimalFormat("0.00")
     val parsed = input.toDoubleOrNull()
     return if (parsed != null) {
         decimalFormat.format(parsed)

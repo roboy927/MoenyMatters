@@ -57,7 +57,7 @@ fun <T : FinancialItem> FinancialItemList(
                     modifier = modifier,
                     item = item,
                     itemAmount = if (uiState.isAmountLoading) "---" else when (uiState.amountViewType) {
-                        AmountViewType.TOTAL -> item.amount.toString()
+                        AmountViewType.TOTAL -> "${item.amount + (uiState.monthlyAmounts[capitalizeWords(item.name)] ?: 0.0)}"
                         AmountViewType.MONTH -> uiState.monthlyAmounts[capitalizeWords(item.name)]?.toString() ?: "0.0"
                         AmountViewType.YEAR -> uiState.monthlyAmounts[capitalizeWords(item.name)]?.toString() ?: "0.0"
                     },
@@ -125,7 +125,7 @@ fun <T : FinancialItem> FinancialItemList(
             Text(
                 text = stringResource(id = R.string.rupee_symbol) + " " + if (uiState.isAmountLoading) "---"
                 else when (uiState.amountViewType) {
-                    AmountViewType.TOTAL -> allItems.sumOf { it.amount }.toString()
+                    AmountViewType.TOTAL -> (allItems.sumOf { it.amount } + uiState.monthlyAmounts.values.sum()).toString()
                     AmountViewType.MONTH -> uiState.monthlyAmounts.values.sum().toString()
                     AmountViewType.YEAR -> uiState.monthlyAmounts.values.sum().toString()
                 },

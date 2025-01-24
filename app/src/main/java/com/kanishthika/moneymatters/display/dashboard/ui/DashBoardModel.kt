@@ -3,6 +3,8 @@ package com.kanishthika.moneymatters.display.dashboard.ui
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kanishthika.moneymatters.config.utils.convertDateToMonthYearString
+import com.kanishthika.moneymatters.config.utils.convertDateToYearString
 import com.kanishthika.moneymatters.display.account.data.Account
 import com.kanishthika.moneymatters.display.account.data.AccountRepository
 import com.kanishthika.moneymatters.display.accounting.data.AccountingType
@@ -16,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,31 +36,59 @@ class DashBoardModel @Inject constructor(
     val monthYearList = transactionRepository.getDistinctMonthYearStrings()
     val yearList = transactionRepository.getDistinctYearStrings()
 
-    private suspend fun getAmounts(monthYear: String) {
-            val incomeAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.INCOME.getName())
-            val expenseAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.EXPENSE.getName())
-            val investmentAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.INVESTMENT.getName())
-            val loanEmiAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.LOANEMI.getName())
-            val insuranceAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.INSURANCE.getName())
-            val otherAmount = transactionRepository.getAmountOfAccountingType(monthYear, AccountingType.OTHER.getName())
+    private suspend fun getAmounts(monthYear: String?) {
 
-            _dashBoardUiState.update {
-                it.copy(
-                    incomeAmount = incomeAmount,
-                    expenseAmount = expenseAmount,
-                    investmentAmount = investmentAmount,
-                    loanEmiAmount = loanEmiAmount,
-                    insuranceAmount = insuranceAmount,
-                    otherAmount = otherAmount
-                )
-            }
-            Log.d("TAG", "month: ${dashBoardUiState.value.monthYear} ")
-            Log.d("TAG", "income: ${dashBoardUiState.value.incomeAmount} ")
-            Log.d("TAG", "expense: ${dashBoardUiState.value.expenseAmount} ")
-            Log.d("TAG", "investment: ${dashBoardUiState.value.investmentAmount} ")
-            Log.d("TAG", "loanEmi: ${dashBoardUiState.value.loanEmiAmount} ")
-            Log.d("TAG", "insurance: ${dashBoardUiState.value.insuranceAmount} ")
-            Log.d("TAG", "other: ${dashBoardUiState.value.otherAmount} ")
+        val incomeAmount = transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.INCOME.getName()
+        )
+        val expenseAmount = transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.EXPENSE.getName()
+        )
+        val investmentAmount = transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.INVESTMENT.getName()
+        )
+        val loanEmiAmount = transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.LOANEMI.getName()
+        )
+        val insuranceAmount = transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.INSURANCE.getName()
+        )
+        val otherAmount = transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.OTHER.getName()
+        )
+        Log.d("hii", "getAmounts: ${transactionRepository.getAmountOfAccountingType(null, AccountingType.RETURNTOLENDER.getName())} ")
+        val lenderAmount = (transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.LENDER.getName()) - transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.RETURNTOLENDER.getName())
+        )
+        val borrowerAmount = (transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.BORROWER.getName()) - transactionRepository.getAmountOfAccountingType(
+            monthYear,
+            AccountingType.RETURNFROMBORROWER.getName())
+        )
+
+
+        _dashBoardUiState.update {
+            it.copy(
+                incomeAmount = incomeAmount,
+                expenseAmount = expenseAmount,
+                investmentAmount = investmentAmount,
+                loanEmiAmount = loanEmiAmount,
+                insuranceAmount = insuranceAmount,
+                lenderAmount = lenderAmount,
+                borrowerAmount = borrowerAmount,
+                otherAmount = otherAmount
+            )
+        }
     }
 
     fun loadData() {
@@ -81,30 +112,70 @@ class DashBoardModel @Inject constructor(
         }
     }
 
-    fun changeBackPressedOnce(boolean: Boolean){
+    fun changeBackPressedOnce(boolean: Boolean) {
         _dashBoardUiState.update {
             it.copy(
                 backPressedOnce = boolean
             )
         }
     }
-    fun deleteAccount(account: Account){
+
+    fun deleteAccount(account: Account) {
         viewModelScope.launch {
             accountRepository.deleteAccount(account)
         }
     }
 
-    suspend fun getAccountBalance(accountName: String): Double{
+    suspend fun getAccountBalance(accountName: String): Double {
         val initialBalance = accountRepository.getAccountByName(accountName).balance
         val txnBalance = transactionRepository.getAccountBalance(accountName)
         return initialBalance + txnBalance
     }
 
-    fun changeAmountViewType(amountViewType: AmountViewType){
-        _dashBoardUiState.update{
+    fun changeAmountViewType(amountViewType: AmountViewType) {
+        _dashBoardUiState.update {
             it.copy(
-                amountViewType = amountViewType
+                amountViewType = amountViewType,
+                monthYear = when (amountViewType) {
+                    AmountViewType.YEAR -> convertDateToYearString(
+                        LocalDate.now().toString(),
+                        "yyyy-MM-dd"
+                    )
+
+                    AmountViewType.TOTAL -> ""
+                    AmountViewType.MONTH -> convertDateToMonthYearString(
+                        LocalDate.now().toString(),
+                        "yyyy-MM-dd"
+                    )
+                }
             )
+        }
+        viewModelScope.launch {
+            when (amountViewType) {
+                AmountViewType.TOTAL -> getAmounts(null)
+                AmountViewType.MONTH -> getAmounts(
+                    convertDateToMonthYearString(
+                        LocalDate.now().toString(), "yyyy-MM-dd"
+                    )
+                )
+
+                AmountViewType.YEAR -> getAmounts(
+                    convertDateToYearString(
+                        LocalDate.now().toString(), "yyyy-MM-dd"
+                    )
+                )
+            }
+        }
+    }
+
+    fun changeSummaryTime(monthYear: String) {
+        _dashBoardUiState.update {
+            it.copy(
+                monthYear = monthYear
+            )
+        }
+        viewModelScope.launch {
+            getAmounts(monthYear)
         }
     }
 }

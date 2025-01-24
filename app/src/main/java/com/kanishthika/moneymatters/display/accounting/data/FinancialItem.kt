@@ -6,3 +6,4 @@ interface FinancialItem {
     val amount: Double
     val description: String
 }
+

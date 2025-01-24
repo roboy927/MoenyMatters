@@ -15,7 +15,7 @@ class IncomeModel @Inject constructor(
     transactionRepository: TransactionRepository
 ) : BaseFinancialModel<Income>(repository, transactionRepository) {
 
-    override fun getAccountingType(): AccountingType = AccountingType.INVESTMENT
+    override fun getAccountingType(): AccountingType = AccountingType.INCOME
 
     override fun createNewItem(): Income {
         return Income(

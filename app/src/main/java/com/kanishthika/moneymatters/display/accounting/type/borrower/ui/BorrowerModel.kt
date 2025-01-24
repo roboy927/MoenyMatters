@@ -15,7 +15,7 @@ class BorrowerModel @Inject constructor(
     transactionRepository: TransactionRepository
 ) : BaseFinancialModel<Borrower>(repository, transactionRepository) {
 
-    override fun getAccountingType(): AccountingType = AccountingType.INVESTMENT
+    override fun getAccountingType(): AccountingType = AccountingType.BORROWER
 
     override fun createNewItem(): Borrower {
         return Borrower(

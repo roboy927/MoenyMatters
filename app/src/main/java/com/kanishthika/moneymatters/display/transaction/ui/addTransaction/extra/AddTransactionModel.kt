@@ -186,6 +186,7 @@ class AddTransactionModel @Inject constructor(
                             AccountingType.OTHER -> accountingRepository.getAllIncomes
                             AccountingType.RETURNFROMBORROWER -> accountingRepository.getAllBorrowers
                             AccountingType.RETURNTOLENDER -> accountingRepository.getAllLenders
+                            AccountingType.TTS -> TODO()
                         }
                     )
                 this[currentPage] = updatedState

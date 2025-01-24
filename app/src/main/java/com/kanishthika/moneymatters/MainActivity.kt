@@ -2,7 +2,6 @@ package com.kanishthika.moneymatters
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -29,23 +28,11 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         splashScreen.setKeepOnScreenCondition { viewModel.isLoading.value }
-        /*val googleSignInAccount = GoogleSigndaIn.getLastSignedInAccount(this)
-        val credential = GoogleAccountCredential.usingOAuth2(this, setOf(Scopes.DRIVE_FILE))
-        credential.selectedAccount = googleSignInAccount?.account
-
-        Log.d("TAG", "onCreate: ${credential.selectedAccountName} ")*/
-
-        val dbFile = java.io.File(this.getDatabasePath("AccountDB").absolutePath)
-        Log.d("TAG", "path: $dbFile ")
-
-
-
-
 
         setContent {
             MoneyMattersTheme {
                 enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(0xFF000000.toInt()))
-                AppNavHost(applicationContext)
+                AppNavHost()
             }
         }
     }

@@ -56,12 +56,12 @@ class AppModule{
     @Provides
     @Singleton
     fun provideDriveService(
-        @ApplicationContext context: Context,
+        googleSignInClient: GoogleSignInClient
     ): Drive {
-        val account = GoogleSignIn.getLastSignedInAccount(context)
+        val account = GoogleSignIn.getLastSignedInAccount(googleSignInClient.applicationContext)
             ?: throw IllegalStateException("No signed-in Google account found")
         val credential = GoogleAccountCredential.usingOAuth2(
-            context, setOf(DriveScopes.DRIVE_FILE)
+            googleSignInClient.applicationContext, setOf(DriveScopes.DRIVE_FILE)
         )
         credential.selectedAccount = account.account
         return Drive.Builder(

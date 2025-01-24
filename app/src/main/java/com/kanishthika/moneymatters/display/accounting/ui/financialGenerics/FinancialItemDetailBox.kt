@@ -2,7 +2,6 @@ package com.kanishthika.moneymatters.display.accounting.ui.financialGenerics
 
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -56,6 +55,8 @@ fun <T : FinancialItem> FinancialItemDetailBox(
     var isContextMenuVisible by rememberSaveable {
         mutableStateOf(false)
     }
+
+    var descriptionVisible by remember { mutableStateOf(false) }
     var pressOffset by remember {
         mutableStateOf(DpOffset.Zero)
     }
@@ -87,6 +88,9 @@ fun <T : FinancialItem> FinancialItemDetailBox(
                         interactionSource.emit(press)
                         tryAwaitRelease()
                         interactionSource.emit(PressInteraction.Release(press))
+                    },
+                    onTap = {
+                        descriptionVisible = !descriptionVisible
                     }
                 )
             }
@@ -103,7 +107,9 @@ fun <T : FinancialItem> FinancialItemDetailBox(
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Spacer(modifier = modifier.height(4.dp))
-                    LimitWordDescription(text = capitalizeWords(item.description), modifier)
+                    if (descriptionVisible){
+                        Description(text = capitalizeWords(item.description))
+                    }
                 }
                 Spacer(modifier = modifier.width(50.dp))
                 Box(contentAlignment = Alignment.TopEnd) {
@@ -140,18 +146,11 @@ fun <T : FinancialItem> FinancialItemDetailBox(
 }
 
 @Composable
-fun LimitWordDescription(
-    text: String, modifier: Modifier
+fun Description(
+    text: String
 ) {
-    var fullText by remember {
-        mutableStateOf(false)
-    }
     Text(text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = if (!fullText) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onPrimaryContainer,
-        modifier = modifier.clickable {
-            fullText = !fullText
-        },
-        maxLines = if (fullText) Int.MAX_VALUE else 1
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
     )
 }

@@ -1,6 +1,5 @@
 package com.kanishthika.moneymatters.config.navigation
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -52,6 +51,7 @@ import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.AddLender
 import com.kanishthika.moneymatters.display.accounting.type.lenders.ui.LenderModel
 import com.kanishthika.moneymatters.display.accounting.ui.AccountingScreen
 import com.kanishthika.moneymatters.display.accounting.ui.AccountingViewModel
+import com.kanishthika.moneymatters.display.backUp.BackUpDatabaseScreen
 import com.kanishthika.moneymatters.display.dashboard.ui.HomeScreen
 import com.kanishthika.moneymatters.display.googleSignIn.SignInScreen
 import com.kanishthika.moneymatters.display.label.data.Label
@@ -89,7 +89,7 @@ inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewmodel(navControll
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun AppNavHost(applicationContext: Context) {
+fun AppNavHost() {
     val modifier: Modifier = Modifier
     val navController = rememberNavController()
 
@@ -117,17 +117,6 @@ fun AppNavHost(applicationContext: Context) {
         composable(NavigationItem.Dashboard.route) {
             HomeScreen(
                 navController = navController,
-                navigateToAddTransaction = {
-                    navController.navigate(
-                        NavigationItem.AddTransaction2.createAddTransactionScreen(
-                            null
-                        )
-                    ) {
-                        launchSingleTop = true
-                        restoreState = true
-
-                    }
-                },
                 navigateTo = { navController.navigate(it) },
                 navigateToAddAccount = { navController.navigate(NavigationItem.AddAccount.route) },
             )
@@ -435,55 +424,13 @@ fun AppNavHost(applicationContext: Context) {
 
 
         composable(NavigationItem.SignInScreen.route) {
-
-            SignInScreen(
-
-                /*navigateToProfile = {
-                    navController.navigate(NavigationItem.ProfileScreen.route) {
-                       popUpTo(NavigationItem.SignInScreen.route) { inclusive = true }
-                    }
-                }*/
-            )
+            SignInScreen()
         }
 
+        composable(NavigationItem.BackUpScreen.route){
+            BackUpDatabaseScreen(back = { navController.popBackStack() })
+        }
     }
-    // val viewModel = viewModel<SignInViewModel>()
-    /* val state by viewModel.state.collectAsStateWithLifecycle()
-
-     LaunchedEffect(key1 = Unit) {
-         if(googleAuthUiClient.getSignedInUser() != null) {
-             navController.navigate(NavigationItem.ProfileScreen.route)
-         }
-     }
-
-     val launcher = rememberLauncherForActivityResult(
-         contract = ActivityResultContracts.StartIntentSenderForResult(),
-         onResult = { result ->
-             if(result.resultCode == RESULT_OK) {
-                 lifecycleCoroutineScope.launch {
-                     val signInResult = googleAuthUiClient.signInWithIntent(
-                         intent = result.data ?: return@launch
-                     )
-                     viewModel.onSignInResult(signInResult)
-                 }
-             }
-         }
-     )
-
-     LaunchedEffect(key1 = state.isSignInSuccessful) {
-         if(state.isSignInSuccessful) {
-             Toast.makeText(
-                 context,
-                 "Sign in successful",
-                 Toast.LENGTH_LONG
-             ).show()
-
-             navController.navigate(NavigationItem.Dashboard.route)
-             viewModel.resetState()
-         }
-     }
-*/
-
 }
 
 

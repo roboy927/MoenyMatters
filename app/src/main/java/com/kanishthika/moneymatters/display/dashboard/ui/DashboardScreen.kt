@@ -8,22 +8,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.waterfall
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,7 +53,8 @@ import androidx.navigation.NavController
 import com.kanishthika.moneymatters.config.navigation.NavigationItem
 import com.kanishthika.moneymatters.config.reminder.NotificationPermissionHandler
 import com.kanishthika.moneymatters.config.utils.capitalizeWords
-import com.kanishthika.moneymatters.display.dashboard.data.menuItems
+import com.kanishthika.moneymatters.display.dashboard.data.dashBoardBottomBarItems
+import com.kanishthika.moneymatters.display.dashboard.data.dashBoardMenuItems
 import com.kanishthika.moneymatters.display.dashboard.ui.element.AccountsDisplayCards
 import com.kanishthika.moneymatters.display.dashboard.ui.element.DashBoardTransactionView
 import com.kanishthika.moneymatters.display.dashboard.ui.element.DashboardSummaryView
@@ -65,10 +68,11 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     dashBoardModel: DashBoardModel = hiltViewModel(),
     navController: NavController,
-    navigateToAddTransaction: ()-> Unit,
-    navigateToAddAccount: ()-> Unit,
+    navigateToAddAccount: () -> Unit,
     navigateTo: (String) -> Unit,
 ) {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
 
     val scope = rememberCoroutineScope()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -79,6 +83,7 @@ fun HomeScreen(
     val dashBoardUiState by dashBoardModel.dashBoardUiState.collectAsStateWithLifecycle()
     val monthList by dashBoardModel.monthYearList.collectAsStateWithLifecycle(initialValue = emptyList())
     val yearList by dashBoardModel.yearList.collectAsStateWithLifecycle(initialValue = emptyList())
+
 
     BackHandler {
         if (dashBoardUiState.backPressedOnce) {
@@ -101,6 +106,44 @@ fun HomeScreen(
     }
 
     Scaffold(
+        bottomBar = {
+            BottomAppBar(
+                modifier = Modifier.height(screenHeight * 0.07f),
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                windowInsets = WindowInsets.waterfall
+            ) {
+                Row(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(6.dp, 0.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    dashBoardBottomBarItems().forEach { item ->
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable(
+                                    onClick = { navController.navigate(item.route) },
+                                )
+                                .padding(8.dp) // Optional padding for touch area
+                        ) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = MaterialTheme.colorScheme.outline
+                            )
+                            Text(
+                                text = item.label,
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
+                    }
+                }
+            }
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -123,6 +166,13 @@ fun HomeScreen(
                     }
                     IconButton(onClick = { navController.navigate(NavigationItem.BackUpScreen.route) }) {
                         Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "BackUp",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate(NavigationItem.BackUpScreen.route) }) {
+                        Icon(
                             Icons.Filled.Settings,
                             contentDescription = "Settings",
                             tint = MaterialTheme.colorScheme.onBackground
@@ -132,29 +182,6 @@ fun HomeScreen(
             )
 
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = modifier.height(IntrinsicSize.Min),
-                onClick = {
-                   navigateToAddTransaction()
-                    },
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(0.7f),
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer.copy(0.8f)
-            ) {
-                Row(
-                    modifier = modifier.padding(horizontal = 8.dp, vertical = 0.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(Icons.Filled.AddCircle, contentDescription = "Add")
-                    Text(
-                        text = "Transaction",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
         snackbarHost = {
             SnackbarHost(snackBarHostState) {
                 Snackbar(
@@ -178,48 +205,21 @@ fun HomeScreen(
                 AccountsDisplayCards(
                     modifier,
                     accounts = dashBoardUiState.accountList,
-                    deleteAccount = { dashBoardModel.deleteAccount(it)},
+                    deleteAccount = { dashBoardModel.deleteAccount(it) },
                     scope,
                     snackBarHostState = snackBarHostState,
                     addAccountScreen = navigateToAddAccount,
                     getBalance = {
-                        DecimalFormat("#.##").format(dashBoardModel.getAccountBalance(capitalizeWords(it.name)))
+                        DecimalFormat("#.##").format(
+                            dashBoardModel.getAccountBalance(
+                                capitalizeWords(it.name)
+                            )
+                        )
                     }
                 )
             }
-//----------------------------------------------------------------------------------------------------
-            item {
-                Column {
-                    Text(
-                        text = "Menu and Tools",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = modifier.padding(4.dp),
-                    )
-                    Spacer(modifier = modifier.height(8.dp))
-                    Menu(menuItems = menuItems(), navigateTo = { navigateTo(it) })
-                }
-            }
-//---------------------------------------------------------------------------------------------------
-            item {
-                Column(
-                    modifier = modifier.animateContentSize()
-                ) {
-                    Text(
-                        text = "Transactions",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = modifier.padding(4.dp),
-                    )
-                    DashBoardTransactionView(
-                        modifier = modifier,
-                        list = recentTransactionList,
-                        navController = navController,
-                        scope = scope
-                    )
 
-                }
-            }
+
 //-----------------------------------------------------------------------------------------------------
             item {
                 Column {
@@ -238,13 +238,51 @@ fun HomeScreen(
                         insurance = dashBoardUiState.insuranceAmount,
                         loanEmi = dashBoardUiState.loanEmiAmount,
                         other = dashBoardUiState.otherAmount,
+                        lender = dashBoardUiState.lenderAmount,
+                        borrower = dashBoardUiState.borrowerAmount,
                         amountViewType = dashBoardUiState.amountViewType,
-                        monthText = "month",
-                        yearText = "year",
+                        monthText = dashBoardUiState.monthYear,
+                        yearText = dashBoardUiState.monthYear,
                         monthList = monthList,
                         yearList = yearList,
-                        changeAmountViewType = { dashBoardModel.changeAmountViewType(it) }
+                        changeAmountViewType = { dashBoardModel.changeAmountViewType(it) },
+                        changeSummaryTime = {
+                            dashBoardModel.changeSummaryTime(it)
+                        }
                     )
+                }
+            }
+//----------------------------------------------------------------------------------------------------
+            item {
+                Column {
+                    Text(
+                        text = "Menu and Tools",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = modifier.padding(4.dp),
+                    )
+                    Spacer(modifier = modifier.height(8.dp))
+                    Menu(clickableItems = dashBoardMenuItems(), navigateTo = { navigateTo(it) })
+                }
+            }
+//----------------------------------------------------------------------------------------------------
+            item {
+                Column(
+                    modifier = modifier.animateContentSize()
+                ) {
+                    Text(
+                        text = "Transactions",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = modifier.padding(4.dp),
+                    )
+                    DashBoardTransactionView(
+                        modifier = modifier,
+                        list = recentTransactionList,
+                        navController = navController,
+                        scope = scope
+                    )
+
                 }
             }
 

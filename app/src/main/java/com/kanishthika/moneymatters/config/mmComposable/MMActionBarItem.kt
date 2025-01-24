@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ fun MMActionBarItem(
     iconSize: Dp = 20.dp,
     fontSize: TextUnit = 14.sp,
     color: Color = MaterialTheme.colorScheme.onBackground.copy(0.6f) ,
+    fontWeight: FontWeight = FontWeight.Normal
 
     ) {
     Row(
@@ -62,7 +64,8 @@ fun MMActionBarItem(
         Text(
             text = text,
             color = color,
-            fontSize = fontSize
+            fontSize = fontSize,
+            fontWeight = fontWeight
         )
     }
 }

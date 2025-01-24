@@ -1,13 +1,8 @@
 package com.kanishthika.moneymatters.display.backUp
 
-import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.common.api.ApiException
 import com.google.api.client.http.InputStreamContent
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
@@ -17,36 +12,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GoogleViewModel @Inject constructor(
-    val googleSignInClient: GoogleSignInClient,
-   private val driveService: Drive
-) : ViewModel() {
+class BackUpDBViewModel @Inject constructor(
+    private val driveService: Drive
+): ViewModel() {
 
     var uploadProgress = mutableStateOf(0) // Progress percentage
         private set
     var uploadMessage = mutableStateOf<String?>(null) // Success or failure message
         private set
 
-    fun handleSignInResult(data: Intent?, onResult: (GoogleSignInAccount?) -> Unit) {
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            onResult(account)
-        } catch (e: ApiException) {
-            onResult(null)
-        }
-    }
+    var downloadProgress = mutableStateOf(0) // Progress percentage
+        private set
+    var downloadMessage = mutableStateOf<String?>(null) // Success or failure message
+        private set
 
-    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        googleSignInClient.signOut()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onSuccess()
-                } else {
-                    task.exception?.let(onFailure)
-                }
-            }
-    }
 
     fun uploadFileToDrive(fileList: List<java.io.File>, onSuccess: () -> Unit, onFailure: (Exception) -> Unit,
                           onProgress: (Int) -> Unit,
@@ -120,5 +99,55 @@ class GoogleViewModel @Inject constructor(
                 uploadMessage.value = "Upload failed: ${e.message}"
             }
         }.start()
+    }
+
+    fun downloadDatabaseFilesFromDrive(
+        localDatabaseDir: String, // Directory where the database files are stored
+        folderName: String = "MMBackup",
+        fileNames: List<String> = listOf("AccountDB", "AccountDB-shm", "AccountDB-wal")
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Step 1: Locate the folder on Google Drive
+                val folder = driveService.files().list()
+                    .setQ("mimeType = 'application/vnd.google-apps.folder' and name = '$folderName'")
+                    .setSpaces("drive")
+                    .setFields("files(id, name)")
+                    .execute()
+                    .files
+                    .firstOrNull() ?: throw Exception("Folder '$folderName' not found on Google Drive.")
+
+                fileNames.forEachIndexed { index, fileName ->
+                    try {
+                        // Step 2: Locate each file in the folder
+                        val file = driveService.files().list()
+                            .setQ("name = '$fileName' and '${folder.id}' in parents")
+                            .setSpaces("drive")
+                            .setFields("files(id, name)")
+                            .execute()
+                            .files
+                            .firstOrNull() ?: throw Exception("File '$fileName' not found in folder '$folderName'.")
+
+                        // Step 3: Download the file content
+                        val localFilePath = "$localDatabaseDir/$fileName"
+                        val outputStream = java.io.File(localFilePath).outputStream()
+                        driveService.files().get(file.id).executeMediaAndDownloadTo(outputStream)
+
+                        // Update progress
+                        val progress = ((index + 1) * 100) / fileNames.size
+                        downloadProgress.value = progress
+                    } catch (fileException: Exception) {
+                        fileException.printStackTrace()
+                        downloadMessage.value = "Failed to download $fileName: ${fileException.message}"
+                    }
+                }
+
+                // Step 4: Notify success
+                downloadMessage.value = "All database files downloaded and replaced successfully!"
+            } catch (e: Exception) {
+                e.printStackTrace()
+                downloadMessage.value = "Database files download failed: ${e.message}"
+            }
+        }
     }
 }

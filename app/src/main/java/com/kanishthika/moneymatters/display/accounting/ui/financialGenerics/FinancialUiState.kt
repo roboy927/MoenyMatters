@@ -12,12 +12,11 @@ data class FinancialUiState<T : FinancialItem>(
     val amount: String = "",
     val description: String = "",
     val selectedItem: T? = null,
-    val totalAmount: Map<String, Double> = emptyMap(),
     val monthlyAmounts: Map<String, Double> = emptyMap(),
-    val yearlyAmount: Double = 0.0,
-    val amountViewType: AmountViewType = AmountViewType.TOTAL,
-    val monthText: String = "Current Month",
-    val yearText: String = "Current Year",
+
+    val amountViewType: AmountViewType = AmountViewType.MONTH,
+    val monthText: String = "",
+    val yearText: String = "",
     var isEditEnable: Boolean = true,
 
     //UiState for Insurance and Loan

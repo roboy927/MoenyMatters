@@ -67,3 +67,15 @@ fun convertDateToMonthYearString(inputDate: String, inputFormatPattern: String):
     // Format the date to the desired output format
     return outputFormat.format(date)
 }
+
+fun convertDateToYearString(inputDate: String, inputFormatPattern: String): String {
+    // Define the input and output date formats
+    val inputFormat = SimpleDateFormat(inputFormatPattern, Locale.getDefault())
+    val outputFormat = SimpleDateFormat("yyyy", Locale.getDefault())
+
+    // Parse the input date
+    val date = inputFormat.parse(inputDate)
+
+    // Format the date to the desired output format
+    return outputFormat.format(date)
+}

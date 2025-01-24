@@ -12,6 +12,7 @@ sealed class AccountingType {
     object RETURNTOLENDER: AccountingType()
     object LOANEMI: AccountingType()
     object OTHER: AccountingType()
+    object TTS: AccountingType()
 }
 
 fun AccountingType.getName(): String {
@@ -23,10 +24,11 @@ fun AccountingType.getName(): String {
         is AccountingType.LENDER -> "Lender"
         AccountingType.LOANEMI -> "Loan EMI"
         AccountingType.RETURNFROMBORROWER -> "Return From Borrower"
-        AccountingType.RETURNTOLENDER -> "Return to Lender"
+        AccountingType.RETURNTOLENDER -> "Return To Lender"
         AccountingType.INSURANCE -> "Insurance"
         AccountingType.LOAN -> "Loan"
         AccountingType.OTHER -> "Other"
+        AccountingType.TTS -> "Tts"
     }
 }
 
@@ -34,15 +36,16 @@ fun toAccountingType(type: String): AccountingType {
     return when (type) {
         "Investment" -> AccountingType.INVESTMENT
         "Expense" -> AccountingType.EXPENSE
-        "Borrowers" -> AccountingType.BORROWER
+        "Borrower" -> AccountingType.BORROWER
         "Income" -> AccountingType.INCOME
-        "Lenders" -> AccountingType.LENDER
+        "Lender" -> AccountingType.LENDER
         "Loan EMI" -> AccountingType.LOANEMI
         "Return From Borrower" -> AccountingType.RETURNFROMBORROWER
-        "Return to Lender" -> AccountingType.RETURNTOLENDER
+        "Return To Lender" -> AccountingType.RETURNTOLENDER
         "Loan" -> AccountingType.LOAN
         "Insurance" -> AccountingType.INSURANCE
         "Other" -> AccountingType.OTHER
+        "Tts" -> AccountingType.TTS
         else -> AccountingType.INCOME
     }
 }
@@ -60,6 +63,5 @@ fun getAllAccountingTypes(): List<AccountingType> {
         AccountingType.LOAN,
         AccountingType.INSURANCE,
         AccountingType.OTHER
-
     )
 }

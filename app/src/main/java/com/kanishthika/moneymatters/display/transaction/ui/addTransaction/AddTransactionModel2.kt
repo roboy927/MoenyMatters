@@ -61,6 +61,7 @@ class AddTransactionModel2 @Inject constructor(
             AccountingType.OTHER -> accountingRepository.getAllIncomes
             AccountingType.RETURNFROMBORROWER -> accountingRepository.getAllBorrowers
             AccountingType.RETURNTOLENDER -> accountingRepository.getAllLenders
+            AccountingType.TTS -> TODO()
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -383,6 +384,7 @@ class AddTransactionModel2 @Inject constructor(
             AccountingType.OTHER -> accountingRepository.getLenderByName(name)
             AccountingType.RETURNFROMBORROWER -> accountingRepository.getBorrowerByName(name)
             AccountingType.RETURNTOLENDER -> accountingRepository.getLenderByName(name)
+            AccountingType.TTS -> TODO()
         }
     }
 

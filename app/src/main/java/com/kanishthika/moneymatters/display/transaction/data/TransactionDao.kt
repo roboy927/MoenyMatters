@@ -35,14 +35,26 @@ interface TransactionDao {
     suspend fun getTxnByReminderID(id: Int): Transaction?
     //this return 1 if string found and return 0 if not
 
-    @Query("SELECT accountingName, SUM(amount) as totalAmount FROM transaction_list WHERE date LIKE '%' || :monthYear || '%' AND accountingType = :accountingType GROUP BY accountingName")
-    suspend fun getMonthlyAmounts(monthYear: String, accountingType: String): List<MonthlyAmount>
+    @Query("""
+    SELECT accountingName, SUM(amount) as totalAmount 
+    FROM transaction_list 
+    WHERE (date LIKE '%' || :monthYear || '%' OR :monthYear IS NULL) 
+    AND accountingType = :accountingType 
+    GROUP BY accountingName
+""")
+    suspend fun getMonthlyAmounts(monthYear: String?, accountingType: String): List<AccountingNameWiseAmount>
+
 
     @Query("SELECT accountingName, SUM(amount) as totalAmount FROM transaction_list WHERE accountingType = :accountingType GROUP BY accountingName")
-    suspend fun getTotalAmounts(accountingType: String): List<MonthlyAmount>
+    suspend fun getTotalAmounts(accountingType: String): List<AccountingNameWiseAmount>
 
-    @Query("SELECT SUM(amount) FROM transaction_list WHERE date LIKE '%' || :monthYear || '%' AND accountingType = :accountingType")
-    suspend fun getAmountOfAccountingType(monthYear: String, accountingType: String): Double?
+    @Query("""
+    SELECT SUM(amount) 
+    FROM transaction_list 
+    WHERE (:monthYear IS NULL OR date LIKE '%' || :monthYear || '%') 
+      AND accountingType = :accountingType
+    """)
+    suspend fun getAmountOfAccountingType(monthYear: String?, accountingType: String): Double?
 
     @Query("SELECT SUM( CASE  WHEN type = 'Credit' THEN amount WHEN type = 'Debit' THEN -amount ELSE 0 END) AS totalAmount FROM transaction_list WHERE account = :account")
     suspend fun getAccountBalance(account: String): Double?
@@ -58,7 +70,7 @@ interface TransactionDao {
 }
 
 
-data class MonthlyAmount(
+data class AccountingNameWiseAmount(
     val accountingName: String,
     val totalAmount: Double
 )

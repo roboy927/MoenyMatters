@@ -1,7 +1,6 @@
 package com.kanishthika.moneymatters.display.dashboard.ui.element
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,31 +34,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kanishthika.moneymatters.R
 import com.kanishthika.moneymatters.config.mmComposable.MMActionBarItem
 import com.kanishthika.moneymatters.config.mmComposable.MMText3
+import com.kanishthika.moneymatters.config.utils.formatTo2Decimal
 import com.kanishthika.moneymatters.display.accounting.data.AmountViewType
+import com.kanishthika.moneymatters.display.dashboard.data.borrowerColor
 import com.kanishthika.moneymatters.display.dashboard.data.expenseColor
 import com.kanishthika.moneymatters.display.dashboard.data.incomeColor
 import com.kanishthika.moneymatters.display.dashboard.data.insuranceColor
 import com.kanishthika.moneymatters.display.dashboard.data.investmentColor
+import com.kanishthika.moneymatters.display.dashboard.data.lenderColor
 import com.kanishthika.moneymatters.display.dashboard.data.loanEmiColor
 import com.kanishthika.moneymatters.display.dashboard.data.otherColor
+import com.kanishthika.moneymatters.display.dashboard.data.warningColor
 
 @Composable
 fun DashboardSummaryView(
     modifier: Modifier = Modifier,
     amountViewType: AmountViewType,
     changeAmountViewType: (AmountViewType) -> Unit,
+    changeSummaryTime: (String) -> Unit,
     totalIncome: Double,
     expense: Double,
     investment: Double,
     insurance: Double,
     loanEmi: Double,
     other: Double,
+    lender: Double,
+    borrower: Double,
     monthText: String,
     yearText: String,
     monthList: List<String>,
@@ -90,7 +97,8 @@ fun DashboardSummaryView(
                         border = Modifier,
                         iconSize = 20.dp,
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
                     DropdownMenu(
                         modifier = modifier
@@ -104,6 +112,7 @@ fun DashboardSummaryView(
                                 text = { Text(text = it) },
                                 onClick = {
                                     monthDDMenuVisible = false
+                                    changeSummaryTime(it)
                                 }
                             )
                         }
@@ -120,7 +129,8 @@ fun DashboardSummaryView(
                         border = Modifier,
                         iconSize = 15.dp,
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.secondary
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
                     DropdownMenu(
                         modifier = modifier
@@ -134,6 +144,7 @@ fun DashboardSummaryView(
                                 text = { Text(text = it) },
                                 onClick = {
                                     yearDDMenuVisible = false
+                                    changeSummaryTime(it)
                                 }
                             )
                         }
@@ -152,7 +163,8 @@ fun DashboardSummaryView(
                 border = Modifier,
                 iconSize = 15.dp,
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
                 click = Modifier.clickable {
                     changeAmountViewType(
                         when (amountViewType) {
@@ -171,7 +183,9 @@ fun DashboardSummaryView(
             investment = investment,
             insurance = insurance,
             loanEmi = loanEmi,
-            other = other
+            other = other,
+            lender = lender,
+            borrower = borrower
         )
     }
 }
@@ -185,11 +199,13 @@ fun DashBoardSummaryGraphic(
     investment: Double,
     insurance: Double,
     loanEmi: Double,
-    other: Double
+    other: Double,
+    lender: Double,
+    borrower: Double
 ) {
 
-    val expenditure = expense + investment + insurance + loanEmi + other
-    val marginAmount = totalIncome - expenditure
+    val expenditure = expense + investment + insurance + loanEmi + other + borrower
+    val marginAmount = (totalIncome + lender )- expenditure
 
     val totalParts = if (marginAmount > 0) {
         expenditure + marginAmount
@@ -206,8 +222,7 @@ fun DashBoardSummaryGraphic(
                     .clip(RoundedCornerShape(20))
                     .fillMaxWidth()
                     .height(30.dp)
-                    .background(Color.Transparent)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(20)),
+                    .background(Color.Transparent),
                 horizontalArrangement = if (emptyData) Arrangement.Center else Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -255,6 +270,14 @@ fun DashBoardSummaryGraphic(
                             .background(otherColor)
                     )
                 }
+                if (borrower > 0) {
+                    Box(
+                        modifier = modifier
+                            .weight((borrower / totalParts).toFloat())
+                            .fillMaxHeight()
+                            .background(borrowerColor)
+                    )
+                }
                 if (marginAmount > 0) {
                     Box(
                         modifier = modifier
@@ -263,12 +286,13 @@ fun DashBoardSummaryGraphic(
                             .background(Color.Transparent)
                     )
                 }
+
             }
             Spacer(modifier = modifier.height(4.dp))
             if (totalIncome > 0) {
-                if (marginAmount < 0) {
                     Row(
                         modifier = modifier
+                            .clip(RoundedCornerShape(40))
                             .fillMaxWidth()
                             .height(5.dp)
                     ) {
@@ -276,30 +300,23 @@ fun DashBoardSummaryGraphic(
                             modifier = modifier
                                 .fillMaxHeight()
                                 .weight((totalIncome / totalParts).toFloat())
-                                .background(MaterialTheme.colorScheme.secondary)
+                                .background(incomeColor)
                         )
                         Box(
                             modifier = modifier
                                 .fillMaxHeight()
-                                .weight((-marginAmount / totalParts).toFloat())
-                                .background(Color.White.copy(0.5f))
+                                .weight((lender.coerceAtLeast(0.1) / totalParts).toFloat())
+                                .background(lenderColor)
                         )
+                        if (marginAmount < 0){
+                            Box(
+                                modifier = modifier
+                                    .fillMaxHeight()
+                                    .weight((-marginAmount / totalParts).toFloat())
+                                    .background(warningColor)
+                            )
+                        }
                     }
-                } else {
-                    Box(
-                        modifier = modifier
-                            .height(5.dp)
-                            .fillMaxWidth()
-                            .background(incomeColor)
-                    )
-                }
-            } else {
-                Box(
-                    modifier = modifier
-                        .height(5.dp)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.outline)
-                )
             }
             if (totalIncome < 0 || marginAmount < 0) {
                 Row(
@@ -310,14 +327,14 @@ fun DashBoardSummaryGraphic(
                     Icon(
                         Icons.Default.Warning,
                         contentDescription = "Warning",
-                        tint = MaterialTheme.colorScheme.outline,
+                        tint = warningColor,
                         modifier = modifier.size(10.dp)
                     )
                     Spacer(modifier = modifier.width(3.dp))
                     Text(
-                        text = "Expenditure higher than Income",
+                        text = "Debit Amount Higher than Credit",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
+                        color = warningColor
                     )
                 }
             }
@@ -345,7 +362,13 @@ fun DashBoardSummaryGraphic(
                         modifier = modifier,
                         name = "Other",
                         color = otherColor,
-                        amount = investment.toString()
+                        amount = other.toString()
+                    )
+                    SummaryItem(
+                        modifier = modifier,
+                        name = "Borrower",
+                        color = borrowerColor ,
+                        amount = borrower.toString()
                     )
                 }
                 Column(
@@ -367,7 +390,13 @@ fun DashBoardSummaryGraphic(
                         modifier = modifier,
                         name = "Income",
                         color = incomeColor,
-                        amount = investment.toString()
+                        amount = totalIncome.toString()
+                    )
+                    SummaryItem(
+                        modifier = modifier,
+                        name = "Lender",
+                        color = lenderColor ,
+                        amount = lender.toString()
                     )
                 }
             }
@@ -393,7 +422,7 @@ fun SummaryItem(
                 .background(color, RoundedCornerShape(20))
         )
         MMText3(text = "$name ")
-        MMText3(text = "${stringResource(id = R.string.rupee_symbol)} $amount")
+        MMText3(text = "${stringResource(id = R.string.rupee_symbol)} ${formatTo2Decimal(amount)}")
     }
 }
 
@@ -402,11 +431,13 @@ fun SummaryItem(
 fun DashBoardSummaryViewPreview() {
     DashBoardSummaryGraphic(
         modifier = Modifier,
-        totalIncome = 0.0,
+        totalIncome = 440.0,
         expense = 150.0,
         investment = 15.0,
         insurance = 10.0,
         loanEmi = 0.0,
-        other = 0.0
+        other = 0.0,
+        lender = 10.0,
+        borrower = 10.0
     )
 }
